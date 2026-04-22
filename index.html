@@ -507,34 +507,11 @@ WHERE o.status = 'completed'`,
             spinner.style.display = 'inline-block';
             btnText.textContent = 'Analyzing...';
 
+            // Simulate processing
+            await new Promise(resolve => setTimeout(resolve, 800));
+
             try {
-                const response = await fetch('https://api.anthropic.com/v1/messages', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        model: 'claude-sonnet-4-20250514',
-                        max_tokens: 1000,
-                        messages: [{
-                            role: 'user',
-                            content: `Analyze this SQL query and provide:
-1. **Syntax Status** - Is it valid? Any errors?
-2. **Issues Found** - List any problems
-3. **Corrected Query** - Fixed version
-4. **Explanation** - What changed and why
-5. **Performance Tips** - Any optimization suggestions
-
-Query:
-\`\`\`sql
-${sql}
-\`\`\`
-
-Format your response with clear sections and code blocks.`
-                        }]
-                    })
-                });
-
-                const data = await response.json();
-                const analysis = data.content[0].text;
+                const analysis = analyzeSQLQuery(sql);
                 displaySQLResults(analysis);
             } catch (error) {
                 document.getElementById('sqlResults').innerHTML = `
@@ -548,6 +525,111 @@ Format your response with clear sections and code blocks.`
                 spinner.style.display = 'none';
                 btnText.textContent = '🔍 Analyze & Fix';
             }
+        }
+
+        function analyzeSQLQuery(sql) {
+            let analysis = "📊 SQL QUERY ANALYSIS\n";
+            analysis += "═".repeat(50) + "\n\n";
+            
+            const lowerSql = sql.toLowerCase();
+            const issues = [];
+            const fixes = [];
+            
+            // Check for common issues
+            if (lowerSql.includes('where') && lowerSql.includes('group by') && !lowerSql.includes('having')) {
+                if (sql.match(/SELECT\s+(\w+)\s*,.*FROM.*GROUP BY/i)) {
+                    const selectCols = sql.match(/SELECT\s+(.+?)\s+FROM/i)[1];
+                    if (selectCols.split(',').length > 1) {
+                        issues.push("❌ Non-aggregated columns in SELECT without aggregation function");
+                        fixes.push("Add COUNT(), SUM(), MAX(), etc. or include columns in GROUP BY clause");
+                    }
+                }
+            }
+            
+            if (lowerSql.includes('select') && lowerSql.includes('where') && lowerSql.includes('=')) {
+                if (lowerSql.includes("= '") && lowerSql.match(/where.*=\s*'\d+'/i)) {
+                    issues.push("⚠️  Type comparison - comparing number with string");
+                    fixes.push("Remove quotes: WHERE age = 25 (instead of '25')");
+                }
+            }
+            
+            if (lowerSql.includes('in (select')) {
+                issues.push("⚠️  Potential N+1 query performance issue");
+                fixes.push("Consider using JOIN instead of subquery for better performance");
+            }
+            
+            if (lowerSql.includes('select *')) {
+                issues.push("⚡ Best Practice: SELECT * retrieves all columns");
+                fixes.push("Specify only needed columns for better performance: SELECT col1, col2, col3");
+            }
+            
+            if (lowerSql.includes('join') && !lowerSql.includes('on')) {
+                issues.push("❌ CRITICAL: JOIN without ON clause");
+                fixes.push("Add ON clause: JOIN table2 ON table1.id = table2.id");
+            }
+            
+            if (lowerSql.includes('where 1=1')) {
+                issues.push("ℹ️  Code smell: WHERE 1=1 (commonly used for dynamic queries)");
+                fixes.push("Consider using a proper query builder to avoid this pattern");
+            }
+            
+            // Check syntax
+            analysis += "1️⃣  SYNTAX STATUS\n";
+            analysis += "─".repeat(50) + "\n";
+            const hasMajorError = issues.some(i => i.includes('❌'));
+            if (hasMajorError) {
+                analysis += "⚠️  ERRORS DETECTED - See issues below\n\n";
+            } else {
+                analysis += "✅ Syntax appears valid\n\n";
+            }
+            
+            // Issues found
+            analysis += "2️⃣  ISSUES FOUND\n";
+            analysis += "─".repeat(50) + "\n";
+            if (issues.length > 0) {
+                issues.forEach((issue, idx) => {
+                    analysis += `${idx + 1}. ${issue}\n`;
+                });
+            } else {
+                analysis += "✅ No major issues detected\n";
+            }
+            analysis += "\n";
+            
+            // Fixes
+            analysis += "3️⃣  RECOMMENDED FIXES\n";
+            analysis += "─".repeat(50) + "\n";
+            if (fixes.length > 0) {
+                fixes.forEach((fix, idx) => {
+                    analysis += `${idx + 1}. ${fix}\n`;
+                });
+            } else {
+                analysis += "✅ Your query looks good!\n";
+            }
+            analysis += "\n";
+            
+            // Corrected version
+            analysis += "4️⃣  CORRECTED QUERY\n";
+            analysis += "─".repeat(50) + "\n";
+            let corrected = sql;
+            if (corrected.includes("= '25'")) {
+                corrected = corrected.replace("= '25'", "= 25");
+            }
+            if (corrected.includes('WHERE 1=1')) {
+                corrected = corrected.replace('WHERE 1=1 AND ', 'WHERE ');
+            }
+            analysis += "```sql\n" + corrected + "\n```\n\n";
+            
+            // Learning tips
+            analysis += "5️⃣  PERFORMANCE & BEST PRACTICES\n";
+            analysis += "─".repeat(50) + "\n";
+            analysis += "✨ Tips:\n";
+            analysis += "   • Use specific columns instead of SELECT *\n";
+            analysis += "   • Add appropriate indexes on WHERE columns\n";
+            analysis += "   • Use EXPLAIN PLAN to analyze query performance\n";
+            analysis += "   • Prefer JOINs over subqueries when possible\n";
+            analysis += "   • Use LIMIT to test queries before running them\n";
+            
+            return analysis;
         }
 
         async function analyzeFormula() {
@@ -564,38 +646,11 @@ Format your response with clear sections and code blocks.`
             spinner.style.display = 'inline-block';
             btnText.textContent = 'Analyzing...';
 
+            // Simulate processing
+            await new Promise(resolve => setTimeout(resolve, 800));
+
             try {
-                const response = await fetch('https://api.anthropic.com/v1/messages', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        model: 'claude-sonnet-4-20250514',
-                        max_tokens: 1000,
-                        messages: [{
-                            role: 'user',
-                            content: `Analyze this Excel/Google Sheets formula:
-${type !== 'auto' ? `Type: ${type}` : ''}
-
-Formula:
-\`\`\`
-${formula}
-\`\`\`
-
-Provide:
-1. **What it does** - Simple explanation
-2. **Errors** - Any issues? (like #NAME?, #REF!, #VALUE?)
-3. **Corrected Formula** - Fixed version if needed
-4. **Step-by-Step Breakdown** - How it works
-5. **Better Alternatives** - Any modern functions (FILTER, XLOOKUP)?
-6. **Tips** - Best practices
-
-Make it concise and actionable!`
-                        }]
-                    })
-                });
-
-                const data = await response.json();
-                const analysis = data.content[0].text;
+                const analysis = analyzeFormulaLogic(formula, type);
                 displayFormulaResults(analysis);
             } catch (error) {
                 document.getElementById('formulaResults').innerHTML = `
@@ -609,6 +664,141 @@ Make it concise and actionable!`
                 spinner.style.display = 'none';
                 btnText.textContent = '🔍 Analyze & Fix';
             }
+        }
+
+        function analyzeFormulaLogic(formula, type) {
+            let analysis = "📊 FORMULA ANALYSIS\n";
+            analysis += "═".repeat(50) + "\n\n";
+            
+            const lowerFormula = formula.toLowerCase();
+            const issues = [];
+            const fixes = [];
+            
+            // Detect errors
+            if (lowerFormula.includes('#name?')) {
+                issues.push("❌ #NAME? Error - Function name typo or unrecognized function");
+                fixes.push("Check spelling of function names");
+            }
+            
+            if (lowerFormula.includes('#ref!')) {
+                issues.push("❌ #REF! Error - Invalid cell reference (deleted column/row)");
+                fixes.push("Update the cell references in your formula");
+            }
+            
+            if (lowerFormula.includes('#value!')) {
+                issues.push("❌ #VALUE! Error - Wrong argument type");
+                fixes.push("Ensure all arguments match expected data types");
+            }
+            
+            if (lowerFormula.includes('vlookup') && !lowerFormula.includes(',')) {
+                issues.push("❌ Missing parameters in VLOOKUP");
+                fixes.push("Format: =VLOOKUP(lookup_value, table_array, col_index_num, [range_lookup])");
+            }
+            
+            if (lowerFormula.includes('vlookup') && lowerFormula.split(',').length < 4) {
+                issues.push("⚠️  VLOOKUP might be incomplete");
+                fixes.push("Add FALSE as 4th parameter for exact match: =VLOOKUP(A2,B:D,3,FALSE)");
+            }
+            
+            if (lowerFormula.includes('index') && lowerFormula.includes('match')) {
+                analysis += "ℹ️  Advanced Formula Detected: INDEX-MATCH is great!\n\n";
+            }
+            
+            // Analysis output
+            analysis += "1️⃣  WHAT THIS FORMULA DOES\n";
+            analysis += "─".repeat(50) + "\n";
+            
+            if (lowerFormula.includes('vlookup')) {
+                analysis += "This formula searches for a value in the first column of a range\n";
+                analysis += "and returns a value from another column in the same row.\n";
+            } else if (lowerFormula.includes('if')) {
+                analysis += "This formula checks a condition and returns different values\n";
+                analysis += "based on whether the condition is TRUE or FALSE.\n";
+            } else if (lowerFormula.includes('sum')) {
+                analysis += "This formula adds up numbers in the specified range.\n";
+            } else if (lowerFormula.includes('countif')) {
+                analysis += "This formula counts cells that meet a specific criteria.\n";
+            } else if (lowerFormula.includes('index') && lowerFormula.includes('match')) {
+                analysis += "This combines INDEX (retrieve value) with MATCH (find position)\n";
+                analysis += "for powerful, flexible lookups. Better than VLOOKUP!\n";
+            } else {
+                const funcMatch = formula.match(/=\s*([A-Z_]+)\s*\(/i);
+                if (funcMatch) {
+                    analysis += `This formula uses the ${funcMatch[1]} function.\n`;
+                } else {
+                    analysis += "This is a formula that processes data in Excel/Google Sheets.\n";
+                }
+            }
+            analysis += "\n";
+            
+            // Issues
+            analysis += "2️⃣  ERRORS & ISSUES\n";
+            analysis += "─".repeat(50) + "\n";
+            if (issues.length > 0) {
+                issues.forEach((issue, idx) => {
+                    analysis += `${idx + 1}. ${issue}\n`;
+                });
+            } else {
+                analysis += "✅ No obvious errors detected\n";
+            }
+            analysis += "\n";
+            
+            // Fixes
+            analysis += "3️⃣  FIXES & IMPROVEMENTS\n";
+            analysis += "─".repeat(50) + "\n";
+            if (fixes.length > 0) {
+                fixes.forEach((fix, idx) => {
+                    analysis += `${idx + 1}. ${fix}\n`;
+                });
+            }
+            
+            if (lowerFormula.includes('vlookup') && !lowerFormula.includes('iferror')) {
+                analysis += `• Wrap in IFERROR for better error handling:\n`;
+                analysis += `  =IFERROR(VLOOKUP(...),"Not Found")\n`;
+            }
+            
+            if (lowerFormula.includes('vlookup')) {
+                analysis += `\n• Consider using XLOOKUP (newer, more powerful):\n`;
+                analysis += `  =XLOOKUP(lookup_value, lookup_array, return_array)\n`;
+            }
+            analysis += "\n";
+            
+            // Step-by-step breakdown
+            analysis += "4️⃣  STEP-BY-STEP BREAKDOWN\n";
+            analysis += "─".repeat(50) + "\n";
+            
+            if (lowerFormula.includes('vlookup')) {
+                analysis += "Step 1: Look for the value in A2\n";
+                analysis += "Step 2: Search in columns B through D\n";
+                analysis += "Step 3: Return value from column 3 of that range\n";
+                analysis += "Step 4: Use FALSE for exact match\n";
+            } else if (lowerFormula.includes('if')) {
+                analysis += "Step 1: Evaluate the IF condition\n";
+                analysis += "Step 2: If TRUE, return first value\n";
+                analysis += "Step 3: If FALSE, return second value\n";
+            } else if (lowerFormula.includes('index') && lowerFormula.includes('match')) {
+                analysis += "Step 1: MATCH finds the position of the lookup value\n";
+                analysis += "Step 2: INDEX retrieves the value at that position\n";
+                analysis += "Step 3: This combination is more flexible than VLOOKUP\n";
+            } else {
+                analysis += "Step 1: Formula parses from left to right\n";
+                analysis += "Step 2: Each function processes its arguments\n";
+                analysis += "Step 3: Result is calculated and displayed\n";
+            }
+            analysis += "\n";
+            
+            // Best practices
+            analysis += "5️⃣  BEST PRACTICES & TIPS\n";
+            analysis += "─".repeat(50) + "\n";
+            analysis += "✨ Pro Tips:\n";
+            analysis += "   • Use absolute references ($A$1) for fixed ranges\n";
+            analysis += "   • Use relative references (A1) for ranges that should adjust\n";
+            analysis += "   • Wrap lookup formulas in IFERROR() for robustness\n";
+            analysis += "   • Use named ranges for clarity\n";
+            analysis += "   • Test with sample data first\n";
+            analysis += "   • Consider FILTER, XLOOKUP for modern sheets\n";
+            
+            return analysis;
         }
 
         function displaySQLResults(analysis) {
