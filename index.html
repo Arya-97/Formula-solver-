@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL & Formula Solver | Fix & Learn Instantly</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        /* Navigation & Header */
+        header {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .nav-tabs {
+            display: flex;
+            gap: 12px;
+        }
+        .nav-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        .nav-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .nav-btn:not(.active) {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        /* Main Content */
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        
+        /* Page Layout */
+        .page {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        @media (max-width: 1024px) {
+            .page { grid-template-columns: 1fr; }
+        }
+        
+        /* Card Styling */
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+        .card:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .icon { font-size: 24px; }
+        
+        /* Input Area */
+        .input-group {
+            margin-bottom: 16px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        textarea {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            resize: vertical;
+            min-height: 120px;
+            transition: all 0.3s;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        button {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(102, 126, 234, 0.3);
+        }
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        
+        /* Results Section */
+        .results {
+            margin-top: 24px;
+            border-top: 2px solid #f0f0f0;
+            padding-top: 24px;
+        }
+        .results.hidden { display: none; }
+        
+        .result-card {
+            margin-bottom: 20px;
+            padding: 16px;
+            background: #f8f9fc;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        .result-card.success { border-left-color: #10b981; }
+        .result-card.warning { border-left-color: #f59e0b; }
+        .result-card.error { border-left-color: #ef4444; }
+        
+        .result-label {
+            font-weight: 700;
+            color: #667eea;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        .result-card.success .result-label { color: #10b981; }
+        .result-card.warning .result-label { color: #f59e0b; }
+        .result-card.error .result-label { color: #ef4444; }
+        
+        .code-block {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            margin-top: 8px;
+        }
+        .code-block code {
+            color: #1a1a1a;
+        }
+        
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            padding: 6px 12px;
+            font-size: 11px;
+            margin-top: 8px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .copy-btn:hover { background: #764ba2; }
+        
+        /* Real Use Cases */
+        .use-cases {
+            margin-top: 24px;
+        }
+        .use-case-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        .use-case-item {
+            padding: 12px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+            border-left: 3px solid transparent;
+        }
+        .use-case-item:hover {
+            background: #e8e8e8;
+            border-left-color: #667eea;
+            padding-left: 15px;
+        }
+        
+        /* Learning Section */
+        .learning-section {
+            background: linear-gradient(135deg, #f0f0f0 0%, #f8f9fc 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .learning-title {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+        .learning-steps {
+            display: grid;
+            gap: 10px;
+        }
+        .step {
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .step-number {
+            font-weight: 700;
+            color: #667eea;
+            margin-right: 6px;
+        }
+        
+        /* Loading Animation */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f0f0f0;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge-info { background: #e0e7ff; color: #667eea; }
+        .badge-success { background: #dcfce7; color: #10b981; }
+        .badge-warning { background: #fef3c7; color: #f59e0b; }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            header { flex-direction: column; gap: 16px; text-align: center; }
+            .page { grid-template-columns: 1fr; }
+            .nav-tabs { width: 100%; }
+            .nav-btn { flex: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="logo">✨ SQL & Formula Solver</div>
+            <div class="nav-tabs">
+                <button class="nav-btn active" onclick="switchTab('sql')">SQL Master</button>
+                <button class="nav-btn" onclick="switchTab('formula')">Formula Pro</button>
+            </div>
+        </header>
+        
+        <!-- SQL Page -->
+        <div id="sql" class="content-section active">
+            <div class="page">
+                <!-- Input Panel -->
+                <div class="card">
+                    <div class="card-title">
+                        <span class="icon">💾</span> Paste Your SQL Query
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Your SQL Code</label>
+                        <textarea id="sqlInput" placeholder="SELECT * FROM users WHERE age > 18; ...or paste your broken query here!"></textarea>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button class="btn-primary" onclick="analyzeSQL()">
+                            <span class="spinner" id="sqlSpinner" style="display: none;"></span>
+                            <span id="sqlBtnText">🔍 Analyze & Fix</span>
+                        </button>
+                        <button class="btn-secondary" onclick="formatSQL()">Format</button>
+                    </div>
+                    
+                    <!-- Real Use Cases -->
+                    <div class="use-cases">
+                        <label style="text-transform: none; font-size: 13px; font-weight: 600;">Quick Examples</label>
+                        <div class="use-case-list">
+                            <div class="use-case-item" onclick="loadSQLExample(0)">❌ Missing JOIN clause</div>
+                            <div class="use-case-item" onclick="loadSQLExample(1)">❌ Typo in column name</div>
+                            <div class="use-case-item" onclick="loadSQLExample(2)">❌ GROUP BY error</div>
+                            <div class="use-case-item" onclick="loadSQLExample(3)">⚡ Slow N+1 query</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Results Panel -->
+                <div class="card">
+                    <div class="card-title">
+                        <span class="icon">🎯</span> Analysis & Explanation
+                    </div>
+                    
+                    <div id="sqlResults" class="results hidden">
+                        <!-- Results will appear here -->
+                    </div>
+                    
+                    <div id="sqlPlaceholder" style="text-align: center; padding: 40px 20px; color: #999;">
+                        <div style="font-size: 48px; margin-bottom: 12px;">📝</div>
+                        <p>Paste your SQL query and click "Analyze & Fix" to get instant feedback, corrections, and explanations!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Formula Page -->
+        <div id="formula" class="content-section">
+            <div class="page">
+                <!-- Input Panel -->
+                <div class="card">
+                    <div class="card-title">
+                        <span class="icon">🧮</span> Paste Your Formula
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Excel / Google Sheets Formula</label>
+                        <textarea id="formulaInput" placeholder="=VLOOKUP(A2,B:D,3,FALSE) ...or paste your broken formula!"></textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Formula Type</label>
+                        <select id="formulaType" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 13px;">
+                            <option value="auto">Auto-detect</option>
+                            <option value="lookup">VLOOKUP / INDEX-MATCH</option>
+                            <option value="text">Text Functions</option>
+                            <option value="math">Math & Aggregates</option>
+                            <option value="date">Date Functions</option>
+                            <option value="conditional">IF / IFS Statements</option>
+                            <option value="array">Array Formulas</option>
+                            <option value="custom">Custom / Complex</option>
+                        </select>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button class="btn-primary" onclick="analyzeFormula()">
+                            <span class="spinner" id="formulaSpinner" style="display: none;"></span>
+                            <span id="formulaBtnText">🔍 Analyze & Fix</span>
+                        </button>
+                        <button class="btn-secondary" onclick="formatFormula()">Format</button>
+                    </div>
+                    
+                    <!-- Real Use Cases -->
+                    <div class="use-cases">
+                        <label style="text-transform: none; font-size: 13px; font-weight: 600;">Common Issues</label>
+                        <div class="use-case-list">
+                            <div class="use-case-item" onclick="loadFormulaExample(0)">❌ #NAME? Error</div>
+                            <div class="use-case-item" onclick="loadFormulaExample(1)">❌ #REF! Broken Range</div>
+                            <div class="use-case-item" onclick="loadFormulaExample(2)">⚡ VLOOKUP returns wrong data</div>
+                            <div class="use-case-item" onclick="loadFormulaExample(3)">❌ #VALUE! Type mismatch</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Results Panel -->
+                <div class="card">
+                    <div class="card-title">
+                        <span class="icon">🎯</span> Analysis & Breakdown
+                    </div>
+                    
+                    <div id="formulaResults" class="results hidden">
+                        <!-- Results will appear here -->
+                    </div>
+                    
+                    <div id="formulaPlaceholder" style="text-align: center; padding: 40px 20px; color: #999;">
+                        <div style="font-size: 48px; margin-bottom: 12px;">📊</div>
+                        <p>Paste your formula and click "Analyze & Fix" to understand what it does, fix errors, and learn best practices!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sqlExamples = [
+            {
+                query: `SELECT u.id, u.name, o.order_id
+FROM users u
+WHERE o.status = 'completed'`,
+                issue: "Missing JOIN with orders table"
+            },
+            {
+                query: `SELECT user_name, COUNT(*) FROM users GROUP BY user_id`,
+                issue: "Inconsistent GROUP BY - user_name not in GROUP BY"
+            },
+            {
+                query: `SELECT * FROM customers WHERE age > '25'`,
+                issue: "Comparing number with string - type mismatch"
+            },
+            {
+                query: `SELECT * FROM users u WHERE u.id IN (SELECT user_id FROM orders)`,
+                issue: "Potential N+1 problem - consider JOIN instead"
+            }
+        ];
+
+        const formulaExamples = [
+            {
+                formula: `=VLOOKUP(A2,B:D,3,FALSE)`,
+                issue: "Returns #NAME? error - check for typo"
+            },
+            {
+                formula: `=VLOOKUP(A2,Sheet1!B:D,2,0)`,
+                issue: "Should return column 3 from range, not 2"
+            },
+            {
+                formula: `=IF(A1="","empty",A1*2)`,
+                issue: "Can't multiply text - use VALUE() or check type first"
+            },
+            {
+                formula: `=INDEX(A:A,MATCH(C2,B:B,0))`,
+                issue: "Better approach with dynamic ranges - use IFERROR()"
+            }
+        ];
+
+        function switchTab(tab) {
+            document.querySelectorAll('.content-section').forEach(e => e.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active'));
+            
+            document.getElementById(tab).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function loadSQLExample(index) {
+            document.getElementById('sqlInput').value = sqlExamples[index].query;
+        }
+
+        function loadFormulaExample(index) {
+            document.getElementById('formulaInput').value = formulaExamples[index].formula;
+        }
+
+        async function analyzeSQL() {
+            const sql = document.getElementById('sqlInput').value.trim();
+            if (!sql) {
+                alert('Please paste a SQL query first!');
+                return;
+            }
+
+            const spinner = document.getElementById('sqlSpinner');
+            const btnText = document.getElementById('sqlBtnText');
+            spinner.style.display = 'inline-block';
+            btnText.textContent = 'Analyzing...';
+
+            try {
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'claude-sonnet-4-20250514',
+                        max_tokens: 1000,
+                        messages: [{
+                            role: 'user',
+                            content: `Analyze this SQL query and provide:
+1. **Syntax Status** - Is it valid? Any errors?
+2. **Issues Found** - List any problems
+3. **Corrected Query** - Fixed version
+4. **Explanation** - What changed and why
+5. **Performance Tips** - Any optimization suggestions
+
+Query:
+\`\`\`sql
+${sql}
+\`\`\`
+
+Format your response with clear sections and code blocks.`
+                        }]
+                    })
+                });
+
+                const data = await response.json();
+                const analysis = data.content[0].text;
+                displaySQLResults(analysis);
+            } catch (error) {
+                document.getElementById('sqlResults').innerHTML = `
+                    <div class="result-card error">
+                        <div class="result-label">Error</div>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+                document.getElementById('sqlResults').classList.remove('hidden');
+            } finally {
+                spinner.style.display = 'none';
+                btnText.textContent = '🔍 Analyze & Fix';
+            }
+        }
+
+        async function analyzeFormula() {
+            const formula = document.getElementById('formulaInput').value.trim();
+            const type = document.getElementById('formulaType').value;
+            
+            if (!formula) {
+                alert('Please paste a formula first!');
+                return;
+            }
+
+            const spinner = document.getElementById('formulaSpinner');
+            const btnText = document.getElementById('formulaBtnText');
+            spinner.style.display = 'inline-block';
+            btnText.textContent = 'Analyzing...';
+
+            try {
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'claude-sonnet-4-20250514',
+                        max_tokens: 1000,
+                        messages: [{
+                            role: 'user',
+                            content: `Analyze this Excel/Google Sheets formula:
+${type !== 'auto' ? `Type: ${type}` : ''}
+
+Formula:
+\`\`\`
+${formula}
+\`\`\`
+
+Provide:
+1. **What it does** - Simple explanation
+2. **Errors** - Any issues? (like #NAME?, #REF!, #VALUE?)
+3. **Corrected Formula** - Fixed version if needed
+4. **Step-by-Step Breakdown** - How it works
+5. **Better Alternatives** - Any modern functions (FILTER, XLOOKUP)?
+6. **Tips** - Best practices
+
+Make it concise and actionable!`
+                        }]
+                    })
+                });
+
+                const data = await response.json();
+                const analysis = data.content[0].text;
+                displayFormulaResults(analysis);
+            } catch (error) {
+                document.getElementById('formulaResults').innerHTML = `
+                    <div class="result-card error">
+                        <div class="result-label">Error</div>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+                document.getElementById('formulaResults').classList.remove('hidden');
+            } finally {
+                spinner.style.display = 'none';
+                btnText.textContent = '🔍 Analyze & Fix';
+            }
+        }
+
+        function displaySQLResults(analysis) {
+            const resultsDiv = document.getElementById('sqlResults');
+            const placeholder = document.getElementById('sqlPlaceholder');
+            
+            resultsDiv.innerHTML = `
+                <div class="result-card">
+                    <div class="result-label">✅ Analysis Complete</div>
+                    <div class="code-block" style="white-space: pre-wrap; font-size: 12px; line-height: 1.6;">
+${escapeHtml(analysis)}
+                    </div>
+                    <button class="copy-btn" onclick="copyToClipboard('${escapeHtml(analysis)}')">📋 Copy Analysis</button>
+                </div>
+            `;
+            
+            resultsDiv.classList.remove('hidden');
+            placeholder.style.display = 'none';
+        }
+
+        function displayFormulaResults(analysis) {
+            const resultsDiv = document.getElementById('formulaResults');
+            const placeholder = document.getElementById('formulaPlaceholder');
+            
+            resultsDiv.innerHTML = `
+                <div class="result-card">
+                    <div class="result-label">✅ Analysis Complete</div>
+                    <div class="code-block" style="white-space: pre-wrap; font-size: 12px; line-height: 1.6;">
+${escapeHtml(analysis)}
+                    </div>
+                    <button class="copy-btn" onclick="copyToClipboard('${escapeHtml(analysis)}')">📋 Copy Analysis</button>
+                </div>
+            `;
+            
+            resultsDiv.classList.remove('hidden');
+            placeholder.style.display = 'none';
+        }
+
+        function formatSQL() {
+            const input = document.getElementById('sqlInput').value;
+            if (!input) return;
+            
+            // Simple formatting
+            let formatted = input
+                .replace(/(\bSELECT\b|\bFROM\b|\bWHERE\b|\bJOIN\b|\bGROUP BY\b|\bORDER BY\b)/gi, '\n$1')
+                .replace(/,\s*/g, ',\n  ')
+                .trim();
+            
+            document.getElementById('sqlInput').value = formatted;
+        }
+
+        function formatFormula() {
+            const input = document.getElementById('formulaInput').value;
+            if (!input) return;
+            
+            // Simple formula formatting with better readability
+            let formatted = input
+                .replace(/,/g, ', ')
+                .replace(/\(/g, '(\n  ')
+                .replace(/\)/g, '\n)')
+                .trim();
+            
+            document.getElementById('formulaInput').value = formatted;
+        }
+
+        function copyToClipboard(text) {
+            // Remove HTML entities if needed
+            const decoded = text.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
+            navigator.clipboard.writeText(decoded).then(() => {
+                alert('✅ Copied to clipboard!');
+            });
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+    </script>
+</body>
+</html>
