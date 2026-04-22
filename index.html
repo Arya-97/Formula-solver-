@@ -690,7 +690,7 @@ WHERE o.status = 'completed'`,
             let analysis = "📊 FORMULA ANALYSIS\n";
             analysis += "═".repeat(50) + "\n\n";
             
-            const lowerFormula = formula.toLowerCase();
+            const lowerFormula = formula.toLowerCase().trim();
             const issues = [];
             const fixes = [];
             let correctedFormula = formula;
@@ -699,76 +699,126 @@ WHERE o.status = 'completed'`,
             let stepByStep = "";
             let bestPractices = "";
             
-            // ===== DETECT ACTUAL FORMULA TYPE =====
-            if (lowerFormula.includes('countifs')) {
-                whatItDoes = "This formula counts cells in a range that meet multiple criteria.\nIt's the multi-criteria version of COUNTIF.";
+            // Extract the main function name CORRECTLY
+            const funcMatch = lowerFormula.match(/=\s*([a-z_]+)\s*\(/i);
+            const mainFunc = funcMatch ? funcMatch[1].toUpperCase() : "UNKNOWN";
+            
+            // ===== DETECT ACTUAL FORMULA TYPE WITH EXACT MATCHING =====
+            if (mainFunc === 'COUNTIF') {
+                whatItDoes = "This formula counts cells in a range that match a single criteria.";
                 
-                // Check COUNTIFS syntax
+                // Validate COUNTIF syntax
                 const commaCount = (formula.match(/,/g) || []).length;
-                if (commaCount < 2) {
-                    issues.push("❌ COUNTIFS requires at least 2 parameters (range, criteria)");
-                    fixes.push("Format: =COUNTIFS(range1, criteria1, [range2, criteria2], ...)");
+                if (commaCount < 1) {
+                    issues.push("❌ COUNTIF requires 2 parameters: range and criteria");
+                    fixes.push("Format: =COUNTIF(range, criteria)");
+                    fixes.push("Example: =COUNTIF(A:A, A2) or =COUNTIF(A2:A100, \"Apple\")");
                     hasErrors = true;
-                } else {
-                    // COUNTIFS is correct
-                    stepByStep = "Step 1: Look at column A (A:A)\nStep 2: Count how many cells match value in A2\nStep 3: Return the count\n\nExample:\nIf A2 = 'Apple' and column A has 3 apples, result = 3";
                 }
                 
-                bestPractices = "✨ COUNTIFS Tips:\n   • Use specific ranges instead of entire column (A2:A100 not A:A) for performance\n   • Can add multiple criteria: =COUNTIFS(A:A,A2, B:B,\">50\")\n   • For single criteria, use COUNTIF instead\n   • Works in both Excel and Google Sheets";
+                // Check for invalid range like :A
+                if (formula.includes(':A') || formula.includes('(:')) {
+                    issues.push("❌ INVALID RANGE: ':A' is not a valid range");
+                    fixes.push("Missing starting cell - should be A:A (entire column) or A1:A100 (specific range)");
+                    fixes.push("Correct: =COUNTIF(A:A, A2) or =COUNTIF(A1:A100, \"value\")");
+                    correctedFormula = formula.replace(/:A(?![0-9])/g, "A:A").replace(/\(:/, "(A:");
+                    hasErrors = true;
+                }
                 
-            } else if (lowerFormula.includes('vlookup')) {
+                // Check for empty criteria
+                if (formula.match(/,\s*\)/)) {
+                    issues.push("❌ Missing criteria parameter");
+                    fixes.push("Add criteria: =COUNTIF(A:A, \"value\") or =COUNTIF(A:A, A2)");
+                    hasErrors = true;
+                }
+                
+                if (!hasErrors) {
+                    stepByStep = "Step 1: Define the range to search (A:A means entire column A)\nStep 2: Define the criteria to match (A2 or \"value\")\nStep 3: Count all cells that match the criteria\nStep 4: Return the count\n\nExample:\nIf A2 = 'Apple' and column A has: Apple, Banana, Apple, Apple\nResult = 3 (three apples found)";
+                }
+                
+                bestPractices = "✨ COUNTIF Tips:\n   • For multiple criteria, use COUNTIFS instead\n   • Use specific ranges (A1:A100) not entire columns for speed\n   • Criteria can be a value: =COUNTIF(A:A, \"Apple\")\n   • Or reference a cell: =COUNTIF(A:A, A2)\n   • Supports wildcards: =COUNTIF(A:A, \"*Apple*\")";
+                
+            } else if (mainFunc === 'COUNTIFS') {
+                whatItDoes = "This formula counts cells that meet multiple criteria (multi-criteria COUNTIF).";
+                
+                const commaCount = (formula.match(/,/g) || []).length;
+                if (commaCount < 2) {
+                    issues.push("❌ COUNTIFS requires at least 2 range/criteria pairs");
+                    fixes.push("Format: =COUNTIFS(range1, criteria1, range2, criteria2, ...)");
+                    fixes.push("Example: =COUNTIFS(A:A, \"Apple\", B:B, \">50\")");
+                    hasErrors = true;
+                } else {
+                    stepByStep = "Step 1: Check range1 against criteria1\nStep 2: AND check range2 against criteria2\nStep 3: Count rows where ALL criteria match\nStep 4: Return the count\n\nExample:\n=COUNTIFS(A:A, \"Apple\", B:B, \">100\")\nFinds rows where column A = Apple AND column B > 100";
+                }
+                
+                bestPractices = "✨ COUNTIFS Tips:\n   • ALL criteria must be TRUE (AND logic)\n   • Use COUNTIF for single criteria\n   • Can have unlimited criteria pairs\n   • Example: =COUNTIFS(A:A, A2, B:B, \">50\", C:C, \"<100\")";
+                
+            } else if (mainFunc === 'VLOOKUP') {
                 whatItDoes = "This formula searches for a value and returns a match from another column.";
                 const commaCount = (formula.match(/,/g) || []).length;
                 if (commaCount < 3) {
                     issues.push("❌ VLOOKUP incomplete - missing parameters");
                     fixes.push("Format: =VLOOKUP(lookup_value, table_array, col_index_num, FALSE)");
+                    fixes.push("Example: =VLOOKUP(A2, B:D, 3, FALSE)");
                     hasErrors = true;
-                    correctedFormula = formula.includes('FALSE') ? formula : formula + ", FALSE)";
+                    correctedFormula = formula.includes('FALSE') ? formula : formula.replace(/\)/, ", FALSE)");
                 } else {
-                    stepByStep = "Step 1: Look for the first parameter value\nStep 2: Search in the table array\nStep 3: Return value from the specified column\nStep 4: FALSE = exact match";
+                    stepByStep = "Step 1: Look for the first parameter value\nStep 2: Search in the table array's first column\nStep 3: Return value from the specified column number\nStep 4: FALSE = exact match, TRUE = approximate match";
                 }
-                bestPractices = "✨ VLOOKUP Tips:\n   • Column must be to the RIGHT of lookup column\n   • Use FALSE for exact match (recommended)\n   • Wrap in IFERROR: =IFERROR(VLOOKUP(...),\"Not Found\")\n   • Consider XLOOKUP for modern sheets (more flexible)";
+                bestPractices = "✨ VLOOKUP Tips:\n   • Lookup column must be LEFTMOST in range\n   • Use FALSE for exact match (recommended)\n   • Wrap in IFERROR: =IFERROR(VLOOKUP(...), \"Not Found\")\n   • Modern alternative: Use XLOOKUP";
                 
-            } else if (lowerFormula.includes('if')) {
+            } else if (mainFunc === 'IF') {
                 whatItDoes = "This formula checks a condition (TRUE/FALSE) and returns different values.";
                 const openParen = (formula.match(/\(/g) || []).length;
                 const closeParen = (formula.match(/\)/g) || []).length;
                 if (openParen !== closeParen) {
-                    issues.push("❌ Mismatched parentheses");
+                    issues.push("❌ Mismatched parentheses: " + openParen + " open, " + closeParen + " close");
+                    fixes.push("Check your parentheses are balanced");
                     hasErrors = true;
                 } else {
-                    stepByStep = "Step 1: Evaluate the IF condition\nStep 2: If TRUE, return first value\nStep 3: If FALSE, return second value";
+                    const commaCount = (formula.match(/,/g) || []).length;
+                    if (commaCount < 1) {
+                        issues.push("❌ IF requires at least 2 parameters: condition and value_if_true");
+                        fixes.push("Format: =IF(condition, value_if_true, value_if_false)");
+                        hasErrors = true;
+                    } else {
+                        stepByStep = "Step 1: Evaluate the condition\nStep 2: If TRUE, return first value\nStep 3: If FALSE, return second value (optional)\nStep 4: Display result";
+                    }
                 }
-                bestPractices = "✨ IF Tips:\n   • Use nested IFs for multiple conditions\n   • Better: Use IFS() for cleaner code\n   • Combine with AND/OR for complex logic\n   • Example: =IF(A1>100, \"High\", \"Low\")";
+                bestPractices = "✨ IF Tips:\n   • Use nested IFs for multiple conditions\n   • Better: Use IFS() for cleaner code: =IFS(A1>100, \"High\", A1>50, \"Medium\", \"Low\")\n   • Combine with AND/OR: =IF(AND(A1>50, B1<100), \"Yes\", \"No\")\n   • Example: =IF(A1>100, \"High\", \"Low\")";
                 
-            } else if (lowerFormula.includes('sum')) {
+            } else if (mainFunc === 'SUMIF') {
+                whatItDoes = "This formula sums values in a range that meet a single criteria.";
+                stepByStep = "Step 1: Check range against criteria\nStep 2: Sum all matching cells\nStep 3: Return the total\n\nExample:\n=SUMIF(A:A, \"Apple\", B:B) sums B values where A = Apple";
+                bestPractices = "✨ SUMIF Tips:\n   • For multiple criteria, use SUMIFS\n   • Format: =SUMIF(range, criteria, sum_range)\n   • Supports comparison: =SUMIF(B:B, \">100\", C:C)";
+                
+            } else if (mainFunc === 'INDEX') {
+                whatItDoes = "This formula returns a value from a range at a specific position.";
+                stepByStep = "Step 1: Specify the range\nStep 2: Specify row number\nStep 3: Specify column number (optional)\nStep 4: Return the value at that position";
+                bestPractices = "✨ INDEX Tips:\n   • Often combined with MATCH: =INDEX(C:C, MATCH(A2, A:A, 0))\n   • Works with rows and columns\n   • More flexible than VLOOKUP";
+                
+            } else if (mainFunc === 'MATCH') {
+                whatItDoes = "This formula finds the position of a value in a range.";
+                stepByStep = "Step 1: Look for the value\nStep 2: Search the range\nStep 3: Return the position (row or column number)\n\nExample: MATCH('Apple', A:A, 0) returns 3 if Apple is in row 3";
+                bestPractices = "✨ MATCH Tips:\n   • Returns position number, not the value\n   • Often used with INDEX for lookups\n   • 0 = exact match, 1 = less than, -1 = greater than";
+                
+            } else if (mainFunc === 'SUM') {
                 whatItDoes = "This formula adds up numbers in the specified range.";
-                stepByStep = "Step 1: Select the range\nStep 2: Add all numeric values\nStep 3: Return the total";
-                bestPractices = "✨ SUM Tips:\n   • Ignores text and blank cells\n   • Use SUMIF for conditional sums\n   • Use SUMIFS for multiple criteria\n   • Example: =SUM(A1:A100) adds all values A1 to A100";
+                stepByStep = "Step 1: Select the range\nStep 2: Add all numeric values\nStep 3: Return the total\n\nExample: =SUM(A1:A100) adds all values from A1 to A100";
+                bestPractices = "✨ SUM Tips:\n   • Ignores text and blank cells\n   • Use SUMIF for conditional sums\n   • Use SUMIFS for multiple criteria\n   • Can sum multiple ranges: =SUM(A:A, C:C)";
                 
-            } else if (lowerFormula.includes('index') && lowerFormula.includes('match')) {
-                whatItDoes = "This advanced formula combines INDEX (retrieve) with MATCH (find position)\nfor powerful flexible lookups better than VLOOKUP.";
-                stepByStep = "Step 1: MATCH finds position of lookup value\nStep 2: INDEX retrieves value at that position\nStep 3: Works with any column direction";
-                bestPractices = "✨ INDEX-MATCH Tips:\n   • More flexible than VLOOKUP\n   • Works with left and right columns\n   • Can look up in any direction\n   • Example: =INDEX(C:C, MATCH(A2, A:A, 0))";
+            } else if (mainFunc === 'FILTER') {
+                whatItDoes = "This modern formula filters data based on conditions (Google Sheets & Excel 365+).";
+                stepByStep = "Step 1: Specify range to filter\nStep 2: Define filter condition\nStep 3: Returns entire filtered array";
+                bestPractices = "✨ FILTER Tips:\n   • Only in Google Sheets and Excel 365+\n   • Returns multiple rows/columns\n   • Can stack multiple FILTER functions\n   • Example: =FILTER(A:A, A:A>50)";
                 
-            } else if (lowerFormula.includes('filter')) {
-                whatItDoes = "This modern formula filters data based on conditions (Google Sheets & newer Excel).";
-                stepByStep = "Step 1: Specify range to filter\nStep 2: Define filter condition\nStep 3: Returns filtered array";
-                bestPractices = "✨ FILTER Tips:\n   • Only in Google Sheets and Excel 365+\n   • Returns entire rows/columns matching criteria\n   • Can stack multiple FILTER functions\n   • Example: =FILTER(A:A, A:A>50)";
-                
-            } else if (lowerFormula.includes('xlookup')) {
+            } else if (mainFunc === 'XLOOKUP') {
                 whatItDoes = "This modern formula searches and returns matches (Excel 365 & Google Sheets).";
                 stepByStep = "Step 1: Look for value\nStep 2: Search range\nStep 3: Return matching value\nStep 4: Optional: return if not found";
                 bestPractices = "✨ XLOOKUP Tips:\n   • Newer, more powerful than VLOOKUP\n   • Works left or right\n   • Built-in error handling\n   • Example: =XLOOKUP(A2, B:B, C:C, \"Not Found\")";
                 
             } else {
-                // Generic formula
-                const funcMatch = formula.match(/=\s*([A-Z_]+)\s*\(/i);
-                if (funcMatch) {
-                    whatItDoes = `This formula uses the ${funcMatch[1]} function to process data.`;
-                } else {
-                    whatItDoes = "This formula performs calculations on your data.";
-                }
+                whatItDoes = `This formula uses the ${mainFunc} function to process data.`;
                 bestPractices = "✨ General Tips:\n   • Use parentheses for clarity\n   • Test with sample data\n   • Use absolute references ($) for fixed ranges\n   • Comment your complex formulas";
             }
             
@@ -777,7 +827,7 @@ WHERE o.status = 'completed'`,
                 const badRef = formula.match(/\d([A-Z])\d/i);
                 if (badRef) {
                     issues.push(`❌ CRITICAL: Invalid cell reference "${badRef[0]}"`);
-                    fixes.push(`Cell references must start with letter (A-Z), not number. Change to: ${badRef[0].replace(/^(\d)/, '')}`);
+                    fixes.push(`Cell references must start with letter. Change to: ${badRef[0].replace(/^(\d)/, '')}`);
                     correctedFormula = formula.replace(/\d([A-Z])(\d)/i, '$1$2');
                     hasErrors = true;
                 }
@@ -795,8 +845,9 @@ WHERE o.status = 'completed'`,
                 issues.forEach((issue, idx) => {
                     analysis += `${idx + 1}. ${issue}\n`;
                 });
+                analysis += "\n";
                 fixes.forEach((fix, idx) => {
-                    analysis += `   Fix: ${fix}\n`;
+                    analysis += `   ✅ ${fix}\n`;
                 });
                 analysis += "\n";
                 
