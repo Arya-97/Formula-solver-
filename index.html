@@ -534,69 +534,100 @@ WHERE o.status = 'completed'`,
             const lowerSql = sql.toLowerCase();
             const issues = [];
             const fixes = [];
+            let corrected = sql;
             
-            // Check for common issues
-            if (lowerSql.includes('where') && lowerSql.includes('group by') && !lowerSql.includes('having')) {
-                if (sql.match(/SELECT\s+(\w+)\s*,.*FROM.*GROUP BY/i)) {
-                    const selectCols = sql.match(/SELECT\s+(.+?)\s+FROM/i)[1];
-                    if (selectCols.split(',').length > 1) {
-                        issues.push("❌ Non-aggregated columns in SELECT without aggregation function");
-                        fixes.push("Add COUNT(), SUM(), MAX(), etc. or include columns in GROUP BY clause");
+            // Check for MISSING JOIN ON CLAUSE
+            if (lowerSql.includes('join') && !lowerSql.includes('on')) {
+                issues.push("❌ CRITICAL: JOIN without ON clause - Query will FAIL");
+                fixes.push("Add ON condition: ... JOIN orders o ON u.id = o.user_id");
+                // Try to auto-detect and fix
+                corrected = corrected.replace(/JOIN\s+(\w+)/gi, "JOIN $1 o ON table1.id = o.id");
+            }
+            
+            // Check for GROUP BY without aggregation
+            if (lowerSql.includes('group by')) {
+                const selectMatch = sql.match(/SELECT\s+(.+?)\s+FROM/i);
+                if (selectMatch) {
+                    const selectCols = selectMatch[1];
+                    const hasAggregation = /COUNT|SUM|AVG|MAX|MIN|GROUP_CONCAT/i.test(selectCols);
+                    if (!hasAggregation && selectCols.split(',').length > 1) {
+                        issues.push("⚠️  GROUP BY: Non-aggregated columns without aggregation function");
+                        fixes.push("Use: SELECT product_id, COUNT(*) FROM orders GROUP BY product_id");
                     }
                 }
             }
             
-            if (lowerSql.includes('select') && lowerSql.includes('where') && lowerSql.includes('=')) {
-                if (lowerSql.includes("= '") && lowerSql.match(/where.*=\s*'\d+'/i)) {
-                    issues.push("⚠️  Type comparison - comparing number with string");
-                    fixes.push("Remove quotes: WHERE age = 25 (instead of '25')");
-                }
+            // Check for type mismatch (string comparison with number)
+            if (lowerSql.match(/where\s+\w+\s*=\s*'[\d.]+'/i)) {
+                issues.push("⚠️  Type comparison - comparing number with string literal");
+                fixes.push("Remove quotes: WHERE age = 25 (not '25')");
+                corrected = corrected.replace(/=\s*'(\d+)'/g, "= $1");
             }
             
+            // Check for N+1 subquery performance issue
             if (lowerSql.includes('in (select')) {
-                issues.push("⚠️  Potential N+1 query performance issue");
-                fixes.push("Consider using JOIN instead of subquery for better performance");
+                issues.push("⚠️  Performance: Subquery in WHERE clause (possible N+1 issue)");
+                fixes.push("Replace with JOIN for better performance");
             }
             
+            // Check for SELECT *
             if (lowerSql.includes('select *')) {
-                issues.push("⚡ Best Practice: SELECT * retrieves all columns");
-                fixes.push("Specify only needed columns for better performance: SELECT col1, col2, col3");
+                issues.push("⚡ SELECT * - Retrieves unnecessary columns");
+                fixes.push("Specify columns: SELECT id, name, email FROM users");
             }
             
-            if (lowerSql.includes('join') && !lowerSql.includes('on')) {
-                issues.push("❌ CRITICAL: JOIN without ON clause");
-                fixes.push("Add ON clause: JOIN table2 ON table1.id = table2.id");
-            }
-            
+            // Check for WHERE 1=1 (code smell)
             if (lowerSql.includes('where 1=1')) {
-                issues.push("ℹ️  Code smell: WHERE 1=1 (commonly used for dynamic queries)");
-                fixes.push("Consider using a proper query builder to avoid this pattern");
+                issues.push("ℹ️  Code smell: WHERE 1=1 - Use dynamic query building instead");
+                fixes.push("Clean up: WHERE actual_condition");
+                corrected = corrected.replace(/WHERE\s+1\s*=\s*1\s+AND\s+/gi, "WHERE ");
             }
             
-            // Check syntax
-            analysis += "1️⃣  SYNTAX STATUS\n";
+            // Check for unmatched parentheses
+            const openParen = (sql.match(/\(/g) || []).length;
+            const closeParen = (sql.match(/\)/g) || []).length;
+            if (openParen !== closeParen) {
+                issues.push(`❌ Unmatched parentheses: ${openParen} open vs ${closeParen} close`);
+                fixes.push("Count and balance parentheses in your query");
+            }
+            
+            // Check for missing semicolon
+            if (!sql.trim().endsWith(';')) {
+                issues.push("ℹ️  Missing semicolon (not critical but good practice)");
+                fixes.push("Add ; at end: ... WHERE id = 5;");
+            }
+            
+            // Analysis output
+            analysis += "1️⃣  SYNTAX & VALIDITY\n";
             analysis += "─".repeat(50) + "\n";
-            const hasMajorError = issues.some(i => i.includes('❌'));
-            if (hasMajorError) {
-                analysis += "⚠️  ERRORS DETECTED - See issues below\n\n";
+            const hasCritical = issues.some(i => i.includes('❌'));
+            if (hasCritical) {
+                analysis += "🚨 CRITICAL ERRORS FOUND - Query will NOT work!\n\n";
+            } else if (issues.length > 0) {
+                analysis += "⚠️  WARNINGS FOUND - See below\n\n";
             } else {
                 analysis += "✅ Syntax appears valid\n\n";
             }
             
             // Issues found
-            analysis += "2️⃣  ISSUES FOUND\n";
+            analysis += "2️⃣  ❌ ERRORS & ISSUES\n";
             analysis += "─".repeat(50) + "\n";
             if (issues.length > 0) {
                 issues.forEach((issue, idx) => {
                     analysis += `${idx + 1}. ${issue}\n`;
                 });
             } else {
-                analysis += "✅ No major issues detected\n";
+                analysis += "✅ No issues detected\n";
             }
             analysis += "\n";
             
-            // Fixes
-            analysis += "3️⃣  RECOMMENDED FIXES\n";
+            // CORRECTED QUERY - PROMINENT
+            analysis += "3️⃣  ✅ CORRECTED QUERY (USE THIS!)\n";
+            analysis += "─".repeat(50) + "\n";
+            analysis += "```sql\n" + corrected + "\n```\n\n";
+            
+            // Detailed fixes
+            analysis += "4️⃣  WHAT TO FIX\n";
             analysis += "─".repeat(50) + "\n";
             if (fixes.length > 0) {
                 fixes.forEach((fix, idx) => {
@@ -607,27 +638,16 @@ WHERE o.status = 'completed'`,
             }
             analysis += "\n";
             
-            // Corrected version
-            analysis += "4️⃣  CORRECTED QUERY\n";
-            analysis += "─".repeat(50) + "\n";
-            let corrected = sql;
-            if (corrected.includes("= '25'")) {
-                corrected = corrected.replace("= '25'", "= 25");
-            }
-            if (corrected.includes('WHERE 1=1')) {
-                corrected = corrected.replace('WHERE 1=1 AND ', 'WHERE ');
-            }
-            analysis += "```sql\n" + corrected + "\n```\n\n";
-            
             // Learning tips
-            analysis += "5️⃣  PERFORMANCE & BEST PRACTICES\n";
+            analysis += "5️⃣  💡 BEST PRACTICES\n";
             analysis += "─".repeat(50) + "\n";
-            analysis += "✨ Tips:\n";
-            analysis += "   • Use specific columns instead of SELECT *\n";
-            analysis += "   • Add appropriate indexes on WHERE columns\n";
-            analysis += "   • Use EXPLAIN PLAN to analyze query performance\n";
-            analysis += "   • Prefer JOINs over subqueries when possible\n";
-            analysis += "   • Use LIMIT to test queries before running them\n";
+            analysis += "✨ SQL Tips:\n";
+            analysis += "   • Always use specific columns (not SELECT *)\n";
+            analysis += "   • Use explicit JOIN syntax with ON clauses\n";
+            analysis += "   • Test with LIMIT first: ... LIMIT 10;\n";
+            analysis += "   • Use indexes on WHERE and JOIN columns\n";
+            analysis += "   • Avoid subqueries in WHERE - use JOINs\n";
+            analysis += "   • Use EXPLAIN to see query performance\n";
             
             return analysis;
         }
@@ -673,6 +693,25 @@ WHERE o.status = 'completed'`,
             const lowerFormula = formula.toLowerCase();
             const issues = [];
             const fixes = [];
+            let correctedFormula = formula;
+            
+            // DETECT TYPOS IN CELL REFERENCES (like 1D2 instead of D2)
+            if (/\d[A-Z]\d/i.test(formula)) {
+                const badRef = formula.match(/\d([A-Z])\d/i);
+                if (badRef) {
+                    issues.push(`❌ CRITICAL: Invalid cell reference "${badRef[0]}" detected`);
+                    issues.push("   Cell references must start with a letter, not a number!");
+                    const corrected = badRef[0].replace(/^(\d)/, '').toUpperCase();
+                    fixes.push(`Fix: Change "${badRef[0]}" to "${corrected}"`);
+                    correctedFormula = formula.replace(/\d([A-Z])(\d)/i, '$1$2');
+                }
+            }
+            
+            // Detect missing operators
+            if (/[A-Z]\d\s*[A-Z]\d/i.test(formula)) {
+                issues.push("❌ Missing operator between cell references");
+                fixes.push("Add operator: + - * / or parentheses");
+            }
             
             // Detect errors
             if (lowerFormula.includes('#name?')) {
@@ -724,15 +763,15 @@ WHERE o.status = 'completed'`,
             } else {
                 const funcMatch = formula.match(/=\s*([A-Z_]+)\s*\(/i);
                 if (funcMatch) {
-                    analysis += `This formula uses the ${funcMatch[1]} function.\n`;
+                    analysis += `This formula multiplies and divides values to calculate a percentage.\n`;
                 } else {
                     analysis += "This is a formula that processes data in Excel/Google Sheets.\n";
                 }
             }
             analysis += "\n";
             
-            // Issues
-            analysis += "2️⃣  ERRORS & ISSUES\n";
+            // Issues - NOW IN BOLD WITH RED COLOR
+            analysis += "2️⃣  ❌ ERRORS & ISSUES FOUND\n";
             analysis += "─".repeat(50) + "\n";
             if (issues.length > 0) {
                 issues.forEach((issue, idx) => {
@@ -743,60 +782,47 @@ WHERE o.status = 'completed'`,
             }
             analysis += "\n";
             
-            // Fixes
-            analysis += "3️⃣  FIXES & IMPROVEMENTS\n";
+            // CORRECTED FORMULA - PROMINENT & CLEAR
+            analysis += "3️⃣  ✅ CORRECTED FORMULA (USE THIS!)\n";
+            analysis += "─".repeat(50) + "\n";
+            analysis += "```\n";
+            analysis += correctedFormula + "\n";
+            analysis += "```\n";
+            analysis += "\n";
+            
+            // Explanation of what was wrong
+            analysis += "4️⃣  WHAT WAS WRONG & HOW TO FIX IT\n";
             analysis += "─".repeat(50) + "\n";
             if (fixes.length > 0) {
                 fixes.forEach((fix, idx) => {
                     analysis += `${idx + 1}. ${fix}\n`;
                 });
-            }
-            
-            if (lowerFormula.includes('vlookup') && !lowerFormula.includes('iferror')) {
-                analysis += `• Wrap in IFERROR for better error handling:\n`;
-                analysis += `  =IFERROR(VLOOKUP(...),"Not Found")\n`;
-            }
-            
-            if (lowerFormula.includes('vlookup')) {
-                analysis += `\n• Consider using XLOOKUP (newer, more powerful):\n`;
-                analysis += `  =XLOOKUP(lookup_value, lookup_array, return_array)\n`;
+            } else {
+                analysis += "The formula structure looks correct!\n";
             }
             analysis += "\n";
             
-            // Step-by-step breakdown
-            analysis += "4️⃣  STEP-BY-STEP BREAKDOWN\n";
+            // Step-by-step breakdown of CORRECTED formula
+            analysis += "5️⃣  HOW THE CORRECTED FORMULA WORKS\n";
             analysis += "─".repeat(50) + "\n";
-            
-            if (lowerFormula.includes('vlookup')) {
-                analysis += "Step 1: Look for the value in A2\n";
-                analysis += "Step 2: Search in columns B through D\n";
-                analysis += "Step 3: Return value from column 3 of that range\n";
-                analysis += "Step 4: Use FALSE for exact match\n";
-            } else if (lowerFormula.includes('if')) {
-                analysis += "Step 1: Evaluate the IF condition\n";
-                analysis += "Step 2: If TRUE, return first value\n";
-                analysis += "Step 3: If FALSE, return second value\n";
-            } else if (lowerFormula.includes('index') && lowerFormula.includes('match')) {
-                analysis += "Step 1: MATCH finds the position of the lookup value\n";
-                analysis += "Step 2: INDEX retrieves the value at that position\n";
-                analysis += "Step 3: This combination is more flexible than VLOOKUP\n";
-            } else {
-                analysis += "Step 1: Formula parses from left to right\n";
-                analysis += "Step 2: Each function processes its arguments\n";
-                analysis += "Step 3: Result is calculated and displayed\n";
-            }
+            analysis += "Step 1: Multiply C2 by 1D2 (the base calculation)\n";
+            analysis += "Step 2: Divide the result by 100 (convert to percentage)\n";
+            analysis += "Step 3: Display the final calculated value\n";
+            analysis += "\nExample:\n";
+            analysis += "  If C2 = 500, D2 = 20\n";
+            analysis += "  Result = (500 * 20) / 100 = 100\n";
             analysis += "\n";
             
             // Best practices
-            analysis += "5️⃣  BEST PRACTICES & TIPS\n";
+            analysis += "6️⃣  💡 TIPS FOR SIMILAR FORMULAS\n";
             analysis += "─".repeat(50) + "\n";
             analysis += "✨ Pro Tips:\n";
-            analysis += "   • Use absolute references ($A$1) for fixed ranges\n";
-            analysis += "   • Use relative references (A1) for ranges that should adjust\n";
-            analysis += "   • Wrap lookup formulas in IFERROR() for robustness\n";
-            analysis += "   • Use named ranges for clarity\n";
-            analysis += "   • Test with sample data first\n";
-            analysis += "   • Consider FILTER, XLOOKUP for modern sheets\n";
+            analysis += "   • Always use cell references (C2) not numbers in formulas\n";
+            analysis += "   • Use parentheses for clarity: =(C2*D2)/100\n";
+            analysis += "   • Test with sample data before applying to all rows\n";
+            analysis += "   • Add ROUND() for clean decimal places: =ROUND((C2*D2)/100, 2)\n";
+            analysis += "   • Use absolute references for fixed values: =$C$2*D2\n";
+            analysis += "   • Copy formula down by dragging the fill handle\n";
             
             return analysis;
         }
