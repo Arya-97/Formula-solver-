@@ -3,75 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SQL & Formula Solver | Fix & Learn Instantly</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css">
+    <title>Advanced Formula Analyzer | Excel & Google Sheets</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
-        .container { max-width: 1200px; margin: 0 auto; }
         
-        /* Navigation & Header */
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        /* Header */
         header {
             background: white;
             border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 32px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
         }
+        
         .logo {
-            font-size: 28px;
-            font-weight: 700;
+            font-size: 32px;
+            font-weight: 800;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        .nav-tabs {
-            display: flex;
-            gap: 12px;
-        }
-        .nav-btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 14px;
-        }
-        .nav-btn.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .nav-btn:not(.active) {
+        
+        .badge {
             background: #f0f0f0;
-            color: #333;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #667eea;
+            text-transform: uppercase;
         }
         
-        /* Main Content */
-        .content-section { display: none; }
-        .content-section.active { display: block; }
-        
-        /* Page Layout */
-        .page {
+        /* Main Grid */
+        .main-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 24px;
-        }
-        @media (max-width: 1024px) {
-            .page { grid-template-columns: 1fr; }
+            margin-bottom: 24px;
         }
         
-        /* Card Styling */
+        @media (max-width: 1200px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+        
+        /* Card */
         .card {
             background: white;
             border-radius: 16px;
@@ -79,25 +72,28 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             transition: all 0.3s;
         }
+        
         .card:hover {
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
         }
         
         .card-title {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 700;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
             color: #1a1a1a;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
-        .icon { font-size: 24px; }
         
-        /* Input Area */
+        .icon { font-size: 28px; }
+        
+        /* Input */
         .input-group {
             margin-bottom: 16px;
         }
+        
         label {
             display: block;
             font-weight: 600;
@@ -107,7 +103,8 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        textarea {
+        
+        textarea, select {
             width: 100%;
             padding: 14px;
             border: 2px solid #e0e0e0;
@@ -115,22 +112,24 @@
             font-family: 'Courier New', monospace;
             font-size: 13px;
             line-height: 1.6;
-            resize: vertical;
-            min-height: 120px;
             transition: all 0.3s;
         }
-        textarea:focus {
+        
+        textarea { min-height: 140px; resize: vertical; }
+        
+        textarea:focus, select:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
         
         /* Buttons */
-        .btn-group {
+        .button-group {
             display: flex;
             gap: 12px;
             margin-top: 16px;
         }
+        
         button {
             flex: 1;
             padding: 12px 16px;
@@ -141,52 +140,78 @@
             font-size: 14px;
             transition: all 0.3s;
         }
+        
         .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
+        
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 15px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
         }
+        
         .btn-secondary {
             background: #f0f0f0;
             color: #333;
         }
+        
         .btn-secondary:hover {
             background: #e0e0e0;
         }
         
-        /* Results Section */
+        /* Results */
         .results {
             margin-top: 24px;
             border-top: 2px solid #f0f0f0;
             padding-top: 24px;
         }
+        
         .results.hidden { display: none; }
         
-        .result-card {
+        .result-section {
             margin-bottom: 20px;
-            padding: 16px;
-            background: #f8f9fc;
-            border-radius: 10px;
-            border-left: 4px solid #667eea;
         }
-        .result-card.success { border-left-color: #10b981; }
-        .result-card.warning { border-left-color: #f59e0b; }
-        .result-card.error { border-left-color: #ef4444; }
         
-        .result-label {
+        .result-header {
+            font-size: 14px;
             font-weight: 700;
             color: #667eea;
-            font-size: 12px;
             text-transform: uppercase;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
             letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .result-card.success .result-label { color: #10b981; }
-        .result-card.warning .result-label { color: #f59e0b; }
-        .result-card.error .result-label { color: #ef4444; }
+        
+        .result-header.error { color: #ef4444; }
+        .result-header.success { color: #10b981; }
+        .result-header.warning { color: #f59e0b; }
+        
+        .result-content {
+            background: #f8f9fc;
+            padding: 16px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            line-height: 1.7;
+            font-size: 14px;
+        }
+        
+        .result-content.error { 
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+        
+        .result-content.success {
+            border-left-color: #10b981;
+            background: #f0fdf4;
+        }
+        
+        .result-content.warning {
+            border-left-color: #f59e0b;
+            background: #fffbeb;
+        }
         
         .code-block {
             background: white;
@@ -198,9 +223,8 @@
             font-size: 12px;
             line-height: 1.5;
             margin-top: 8px;
-        }
-        .code-block code {
-            color: #1a1a1a;
+            white-space: pre-wrap;
+            word-break: break-word;
         }
         
         .copy-btn {
@@ -214,64 +238,54 @@
             cursor: pointer;
             transition: all 0.3s;
         }
+        
         .copy-btn:hover { background: #764ba2; }
         
-        /* Real Use Cases */
-        .use-cases {
-            margin-top: 24px;
-        }
-        .use-case-list {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 10px;
-        }
-        .use-case-item {
-            padding: 12px;
-            background: #f0f0f0;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 13px;
-            border-left: 3px solid transparent;
-        }
-        .use-case-item:hover {
-            background: #e8e8e8;
-            border-left-color: #667eea;
-            padding-left: 15px;
-        }
-        
-        /* Learning Section */
-        .learning-section {
-            background: linear-gradient(135deg, #f0f0f0 0%, #f8f9fc 100%);
+        /* Formula Examples */
+        .formula-guide {
+            background: #f8f9fc;
             border-radius: 12px;
             padding: 20px;
-            margin-top: 20px;
-        }
-        .learning-title {
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 12px;
-            font-size: 14px;
-        }
-        .learning-steps {
-            display: grid;
-            gap: 10px;
-        }
-        .step {
-            padding: 10px;
-            background: white;
-            border-radius: 8px;
-            border-left: 3px solid #667eea;
-            font-size: 13px;
-            line-height: 1.6;
-        }
-        .step-number {
-            font-weight: 700;
-            color: #667eea;
-            margin-right: 6px;
+            margin-top: 24px;
         }
         
-        /* Loading Animation */
+        .formula-category {
+            margin-bottom: 16px;
+        }
+        
+        .category-title {
+            font-weight: 700;
+            color: #667eea;
+            font-size: 13px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        
+        .formula-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .formula-list { grid-template-columns: 1fr; }
+        }
+        
+        .formula-item {
+            padding: 8px 12px;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid #e0e0e0;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        
+        .formula-item:hover {
+            border-color: #667eea;
+            background: #f0f0f0;
+        }
+        
         .spinner {
             display: inline-block;
             width: 16px;
@@ -281,671 +295,1074 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
         
-        /* Badge */
-        .badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
+        .placeholder {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
         }
-        .badge-info { background: #e0e7ff; color: #667eea; }
-        .badge-success { background: #dcfce7; color: #10b981; }
-        .badge-warning { background: #fef3c7; color: #f59e0b; }
         
-        /* Responsive */
-        @media (max-width: 768px) {
-            header { flex-direction: column; gap: 16px; text-align: center; }
-            .page { grid-template-columns: 1fr; }
-            .nav-tabs { width: 100%; }
-            .nav-btn { flex: 1; }
-        }
+        .placeholder-icon { font-size: 48px; margin-bottom: 12px; }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- Header -->
         <header>
-            <div class="logo">✨ SQL & Formula Solver</div>
-            <div class="nav-tabs">
-                <button class="nav-btn active" onclick="switchTab('sql')">SQL Master</button>
-                <button class="nav-btn" onclick="switchTab('formula')">Formula Pro</button>
+            <div class="header-content">
+                <div class="logo">⚡ Formula Analyzer Pro</div>
+                <div style="display: flex; gap: 10px;">
+                    <div class="badge">50+ Formulas</div>
+                    <div class="badge">Nested Support</div>
+                    <div class="badge">Real-Time</div>
+                </div>
             </div>
         </header>
         
-        <!-- SQL Page -->
-        <div id="sql" class="content-section active">
-            <div class="page">
-                <!-- Input Panel -->
-                <div class="card">
-                    <div class="card-title">
-                        <span class="icon">💾</span> Paste Your SQL Query
-                    </div>
-                    
-                    <div class="input-group">
-                        <label>Your SQL Code</label>
-                        <textarea id="sqlInput" placeholder="SELECT * FROM users WHERE age > 18; ...or paste your broken query here!"></textarea>
-                    </div>
-                    
-                    <div class="btn-group">
-                        <button class="btn-primary" onclick="analyzeSQL()">
-                            <span class="spinner" id="sqlSpinner" style="display: none;"></span>
-                            <span id="sqlBtnText">🔍 Analyze & Fix</span>
-                        </button>
-                        <button class="btn-secondary" onclick="formatSQL()">Format</button>
-                    </div>
-                    
-                    <!-- Real Use Cases -->
-                    <div class="use-cases">
-                        <label style="text-transform: none; font-size: 13px; font-weight: 600;">Quick Examples</label>
-                        <div class="use-case-list">
-                            <div class="use-case-item" onclick="loadSQLExample(0)">❌ Missing JOIN clause</div>
-                            <div class="use-case-item" onclick="loadSQLExample(1)">❌ Typo in column name</div>
-                            <div class="use-case-item" onclick="loadSQLExample(2)">❌ GROUP BY error</div>
-                            <div class="use-case-item" onclick="loadSQLExample(3)">⚡ Slow N+1 query</div>
-                        </div>
-                    </div>
+        <!-- Main Content -->
+        <div class="main-grid">
+            <!-- Input Card -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="icon">📝</span> Paste Your Formula
                 </div>
                 
-                <!-- Results Panel -->
-                <div class="card">
-                    <div class="card-title">
-                        <span class="icon">🎯</span> Analysis & Explanation
+                <div class="input-group">
+                    <label>Excel / Google Sheets Formula</label>
+                    <textarea id="formulaInput" placeholder="=COUNTIFS(A:A,&quot;Apple&quot;,B:B,&quot;>50&quot;)
+
+Try nested: =IF(SUMIFS(...)>100,&quot;High&quot;,&quot;Low&quot;)
+
+Paste ANY formula here!"></textarea>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn-primary" onclick="analyzeFormula()">
+                        <span class="spinner" id="spinner" style="display: none;"></span>
+                        <span id="btnText">🔍 Analyze Formula</span>
+                    </button>
+                    <button class="btn-secondary" onclick="clearAll()">Clear</button>
+                </div>
+                
+                <!-- Formula Categories Guide -->
+                <div class="formula-guide">
+                    <div class="formula-category">
+                        <div class="category-title">📊 Counting / Stats</div>
+                        <div class="formula-list">
+                            <div class="formula-item" onclick="loadExample('COUNT(A:A)')">COUNT</div>
+                            <div class="formula-item" onclick="loadExample('COUNTA(A:A)')">COUNTA</div>
+                            <div class="formula-item" onclick="loadExample('COUNTBLANK(A:A)')">COUNTBLANK</div>
+                            <div class="formula-item" onclick="loadExample('COUNTIF(A:A,&quot;>50&quot;)')">COUNTIF</div>
+                            <div class="formula-item" onclick="loadExample('COUNTIFS(A:A,&quot;Apple&quot;,B:B,&quot;>50&quot;)')">COUNTIFS</div>
+                        </div>
                     </div>
                     
-                    <div id="sqlResults" class="results hidden">
-                        <!-- Results will appear here -->
+                    <div class="formula-category">
+                        <div class="category-title">💰 Sum / Math</div>
+                        <div class="formula-list">
+                            <div class="formula-item" onclick="loadExample('SUM(A:A)')">SUM</div>
+                            <div class="formula-item" onclick="loadExample('SUMIF(A:A,&quot;>50&quot;,B:B)')">SUMIF</div>
+                            <div class="formula-item" onclick="loadExample('SUMIFS(A:A,B:B,&quot;Apple&quot;)')">SUMIFS</div>
+                            <div class="formula-item" onclick="loadExample('ROUND(A1,2)')">ROUND</div>
+                            <div class="formula-item" onclick="loadExample('ABS(A1)')">ABS</div>
+                        </div>
                     </div>
                     
-                    <div id="sqlPlaceholder" style="text-align: center; padding: 40px 20px; color: #999;">
-                        <div style="font-size: 48px; margin-bottom: 12px;">📝</div>
-                        <p>Paste your SQL query and click "Analyze & Fix" to get instant feedback, corrections, and explanations!</p>
+                    <div class="formula-category">
+                        <div class="category-title">📈 Average / Stats</div>
+                        <div class="formula-list">
+                            <div class="formula-item" onclick="loadExample('AVERAGE(A:A)')">AVERAGE</div>
+                            <div class="formula-item" onclick="loadExample('AVERAGEIF(A:A,&quot;>50&quot;)')">AVERAGEIF</div>
+                            <div class="formula-item" onclick="loadExample('MAX(A:A)')">MAX</div>
+                            <div class="formula-item" onclick="loadExample('MIN(A:A)')">MIN</div>
+                        </div>
+                    </div>
+                    
+                    <div class="formula-category">
+                        <div class="category-title">🔍 Lookup / Reference</div>
+                        <div class="formula-list">
+                            <div class="formula-item" onclick="loadExample('VLOOKUP(A2,B:D,3,FALSE)')">VLOOKUP</div>
+                            <div class="formula-item" onclick="loadExample('XLOOKUP(A2,B:B,C:C)')">XLOOKUP</div>
+                            <div class="formula-item" onclick="loadExample('INDEX(C:C,MATCH(A2,A:A,0))')">INDEX/MATCH</div>
+                            <div class="formula-item" onclick="loadExample('INDIRECT(&quot;A&quot;&amp;ROW())')">INDIRECT</div>
+                        </div>
+                    </div>
+                    
+                    <div class="formula-category">
+                        <div class="category-title">🔁 Logical</div>
+                        <div class="formula-list">
+                            <div class="formula-item" onclick="loadExample('IF(A1>50,&quot;Yes&quot;,&quot;No&quot;)')">IF</div>
+                            <div class="formula-item" onclick="loadExample('IFS(A1>100,&quot;High&quot;,A1>50,&quot;Med&quot;,&quot;Low&quot;)')">IFS</div>
+                            <div class="formula-item" onclick="loadExample('AND(A1>50,B1<100)')">AND</div>
+                            <div class="formula-item" onclick="loadExample('OR(A1>100,B1>100)')">OR</div>
+                        </div>
+                    </div>
+                    
+                    <div class="formula-category">
+                        <div class="category-title">🧹 Text / Cleaning</div>
+                        <div class="formula-list">
+                            <div class="formula-item" onclick="loadExample('TRIM(A1)')">TRIM</div>
+                            <div class="formula-item" onclick="loadExample('LEN(A1)')">LEN</div>
+                            <div class="formula-item" onclick="loadExample('CONCAT(A1,&quot;-&quot;,B1)')">CONCAT</div>
+                            <div class="formula-item" onclick="loadExample('TEXTJOIN(&quot;-&quot;,TRUE,A:A)')">TEXTJOIN</div>
+                            <div class="formula-item" onclick="loadExample('UPPER(A1)')">UPPER</div>
+                            <div class="formula-item" onclick="loadExample('LOWER(A1)')">LOWER</div>
+                        </div>
+                    </div>
+                    
+                    <div class="formula-category">
+                        <div class="category-title">📅 Date / Time</div>
+                        <div class="formula-list">
+                            <div class="formula-item" onclick="loadExample('TODAY()')">TODAY</div>
+                            <div class="formula-item" onclick="loadExample('NOW()')">NOW</div>
+                            <div class="formula-item" onclick="loadExample('DATEDIF(A1,B1,&quot;D&quot;)')">DATEDIF</div>
+                            <div class="formula-item" onclick="loadExample('EDATE(A1,3)')">EDATE</div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <!-- Formula Page -->
-        <div id="formula" class="content-section">
-            <div class="page">
-                <!-- Input Panel -->
-                <div class="card">
-                    <div class="card-title">
-                        <span class="icon">🧮</span> Paste Your Formula
-                    </div>
-                    
-                    <div class="input-group">
-                        <label>Excel / Google Sheets Formula</label>
-                        <textarea id="formulaInput" placeholder="=VLOOKUP(A2,B:D,3,FALSE) ...or paste your broken formula!"></textarea>
-                    </div>
-                    
-                    <div class="input-group">
-                        <label>Formula Type</label>
-                        <select id="formulaType" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 13px;">
-                            <option value="auto">Auto-detect</option>
-                            <option value="lookup">VLOOKUP / INDEX-MATCH</option>
-                            <option value="text">Text Functions</option>
-                            <option value="math">Math & Aggregates</option>
-                            <option value="date">Date Functions</option>
-                            <option value="conditional">IF / IFS Statements</option>
-                            <option value="array">Array Formulas</option>
-                            <option value="custom">Custom / Complex</option>
-                        </select>
-                    </div>
-                    
-                    <div class="btn-group">
-                        <button class="btn-primary" onclick="analyzeFormula()">
-                            <span class="spinner" id="formulaSpinner" style="display: none;"></span>
-                            <span id="formulaBtnText">🔍 Analyze & Fix</span>
-                        </button>
-                        <button class="btn-secondary" onclick="formatFormula()">Format</button>
-                    </div>
-                    
-                    <!-- Real Use Cases -->
-                    <div class="use-cases">
-                        <label style="text-transform: none; font-size: 13px; font-weight: 600;">Common Issues</label>
-                        <div class="use-case-list">
-                            <div class="use-case-item" onclick="loadFormulaExample(0)">❌ #NAME? Error</div>
-                            <div class="use-case-item" onclick="loadFormulaExample(1)">❌ #REF! Broken Range</div>
-                            <div class="use-case-item" onclick="loadFormulaExample(2)">⚡ VLOOKUP returns wrong data</div>
-                            <div class="use-case-item" onclick="loadFormulaExample(3)">❌ #VALUE! Type mismatch</div>
-                        </div>
-                    </div>
+            
+            <!-- Results Card -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="icon">🎯</span> Analysis & Breakdown
                 </div>
                 
-                <!-- Results Panel -->
-                <div class="card">
-                    <div class="card-title">
-                        <span class="icon">🎯</span> Analysis & Breakdown
-                    </div>
-                    
-                    <div id="formulaResults" class="results hidden">
-                        <!-- Results will appear here -->
-                    </div>
-                    
-                    <div id="formulaPlaceholder" style="text-align: center; padding: 40px 20px; color: #999;">
-                        <div style="font-size: 48px; margin-bottom: 12px;">📊</div>
-                        <p>Paste your formula and click "Analyze & Fix" to understand what it does, fix errors, and learn best practices!</p>
-                    </div>
+                <div id="resultsContainer" class="results hidden">
+                    <!-- Results will appear here -->
+                </div>
+                
+                <div id="placeholder" class="placeholder">
+                    <div class="placeholder-icon">📊</div>
+                    <p>Paste a formula and click "Analyze Formula"</p>
+                    <p style="font-size: 12px; margin-top: 8px; color: #bbb;">Supports 50+ functions including nested formulas</p>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const sqlExamples = [
-            {
-                query: `SELECT u.id, u.name, o.order_id
-FROM users u
-WHERE o.status = 'completed'`,
-                issue: "Missing JOIN with orders table"
+        const formulaDictionary = {
+            'COUNT': {
+                name: 'COUNT',
+                description: 'Counts the number of cells containing numeric values',
+                syntax: '=COUNT(value1, [value2], ...)',
+                examples: [
+                    '=COUNT(A:A) → Counts all numbers in column A',
+                    '=COUNT(A1:A100, B1:B100) → Counts numbers across ranges'
+                ],
+                tips: [
+                    'Ignores text and blank cells',
+                    'Only counts numeric values',
+                    'Useful for checking data completeness'
+                ]
             },
-            {
-                query: `SELECT user_name, COUNT(*) FROM users GROUP BY user_id`,
-                issue: "Inconsistent GROUP BY - user_name not in GROUP BY"
+            'COUNTA': {
+                name: 'COUNTA',
+                description: 'Counts non-empty cells (text, numbers, anything)',
+                syntax: '=COUNTA(value1, [value2], ...)',
+                examples: [
+                    '=COUNTA(A:A) → Counts all non-empty cells',
+                    '=COUNTA(A1:A100) → Counts filled cells in range'
+                ],
+                tips: [
+                    'Counts text, numbers, errors - anything not blank',
+                    'Does NOT count blank cells',
+                    'Better than COUNT for mixed data'
+                ]
             },
-            {
-                query: `SELECT * FROM customers WHERE age > '25'`,
-                issue: "Comparing number with string - type mismatch"
+            'COUNTBLANK': {
+                name: 'COUNTBLANK',
+                description: 'Counts blank/empty cells in a range',
+                syntax: '=COUNTBLANK(range)',
+                examples: [
+                    '=COUNTBLANK(A:A) → Counts empty cells',
+                    '=COUNTBLANK(A1:A100) → Count blanks in range'
+                ],
+                tips: [
+                    'Only counts completely empty cells',
+                    'Ignores cells with spaces or zeros',
+                    'Find missing data in your dataset'
+                ]
             },
-            {
-                query: `SELECT * FROM users u WHERE u.id IN (SELECT user_id FROM orders)`,
-                issue: "Potential N+1 problem - consider JOIN instead"
+            'COUNTIF': {
+                name: 'COUNTIF',
+                description: 'Counts cells that meet ONE criteria',
+                syntax: '=COUNTIF(range, criteria)',
+                examples: [
+                    '=COUNTIF(A:A, ">50") → Count values greater than 50',
+                    '=COUNTIF(A:A, "Apple") → Count "Apple" entries',
+                    '=COUNTIF(A:A, A2) → Count matches to A2'
+                ],
+                tips: [
+                    'Use comparison operators: >, <, >=, <=, =, <>',
+                    'Use wildcards: * (any) ? (single char)',
+                    'Case-insensitive by default'
+                ]
+            },
+            'COUNTIFS': {
+                name: 'COUNTIFS',
+                description: 'Counts cells meeting MULTIPLE criteria (AND logic)',
+                syntax: '=COUNTIFS(range1, criteria1, [range2, criteria2], ...)',
+                examples: [
+                    '=COUNTIFS(A:A, "Apple", B:B, ">50") → Apple AND >50',
+                    '=COUNTIFS(A:A, "A*", B:B, "<100", C:C, "Yes")',
+                    '=COUNTIFS(A:A, A2, B:B, B2, C:C, C2) → Match row'
+                ],
+                tips: [
+                    'ALL criteria must be TRUE (AND logic, not OR)',
+                    'Can have unlimited criteria pairs',
+                    'Perfect for filtering by multiple conditions'
+                ]
+            },
+            'SUM': {
+                name: 'SUM',
+                description: 'Adds up numbers in range(s)',
+                syntax: '=SUM(number1, [number2], ...)',
+                examples: [
+                    '=SUM(A:A) → Sum entire column A',
+                    '=SUM(A1:A100, C1:C100) → Sum multiple ranges',
+                    '=SUM(A1:A100) → Sum specific range'
+                ],
+                tips: [
+                    'Ignores text and blank cells',
+                    'Includes cells with 0',
+                    'Works with named ranges'
+                ]
+            },
+            'SUMIF': {
+                name: 'SUMIF',
+                description: 'Sums values that meet ONE criteria',
+                syntax: '=SUMIF(range, criteria, [sum_range])',
+                examples: [
+                    '=SUMIF(A:A, "Apple", B:B) → Sum B where A="Apple"',
+                    '=SUMIF(B:B, ">50", C:C) → Sum C where B>50',
+                    '=SUMIF(A:A, A2, B:B) → Sum by criteria'
+                ],
+                tips: [
+                    'If sum_range omitted, uses criteria range',
+                    'Supports comparison operators',
+                    'Use with wildcards for partial text'
+                ]
+            },
+            'SUMIFS': {
+                name: 'SUMIFS',
+                description: 'Sums values meeting MULTIPLE criteria (AND logic)',
+                syntax: '=SUMIFS(sum_range, criteria_range1, criteria1, [range2, criteria2], ...)',
+                examples: [
+                    '=SUMIFS(A:A, B:B, "Apple", C:C, ">50")',
+                    '=SUMIFS(D:D, A:A, "Yes", B:B, "<100", C:C, "Active")',
+                    '=SUMIFS(revenue, region, "North", status, "Completed")'
+                ],
+                tips: [
+                    'Unlike SUMIF, sum_range comes FIRST',
+                    'ALL criteria must match',
+                    'Best for multi-column filtering'
+                ]
+            },
+            'AVERAGE': {
+                name: 'AVERAGE',
+                description: 'Calculates average of numeric values',
+                syntax: '=AVERAGE(number1, [number2], ...)',
+                examples: [
+                    '=AVERAGE(A:A) → Average of column A',
+                    '=AVERAGE(A1:A100) → Average of range',
+                    '=AVERAGE(5, 10, 15) → Average of values'
+                ],
+                tips: [
+                    'Ignores text and blank cells',
+                    'Includes zeros in calculation',
+                    'Use AVERAGEIF for conditional average'
+                ]
+            },
+            'AVERAGEIF': {
+                name: 'AVERAGEIF',
+                description: 'Averages values that meet ONE criteria',
+                syntax: '=AVERAGEIF(range, criteria, [average_range])',
+                examples: [
+                    '=AVERAGEIF(A:A, "Apple", B:B) → Avg B for Apple',
+                    '=AVERAGEIF(B:B, ">50", C:C) → Avg C where B>50'
+                ],
+                tips: [
+                    'Only averages matching rows',
+                    'Ignores non-numeric results',
+                    'Pair with AVERAGEIFS for multiple criteria'
+                ]
+            },
+            'AVERAGEIFS': {
+                name: 'AVERAGEIFS',
+                description: 'Averages values meeting MULTIPLE criteria',
+                syntax: '=AVERAGEIFS(average_range, criteria_range1, criteria1, ...)',
+                examples: [
+                    '=AVERAGEIFS(C:C, A:A, "Apple", B:B, ">50")',
+                    '=AVERAGEIFS(salary, department, "Sales", years, ">2")'
+                ],
+                tips: [
+                    'average_range is FIRST parameter',
+                    'ALL criteria must match',
+                    'Returns #DIV/0! if no matches'
+                ]
+            },
+            'MIN': {
+                name: 'MIN',
+                description: 'Returns smallest value in range',
+                syntax: '=MIN(number1, [number2], ...)',
+                examples: [
+                    '=MIN(A:A) → Minimum value in column',
+                    '=MIN(A1:A100, B1:B100) → Min across ranges'
+                ],
+                tips: [
+                    'Ignores text and blank cells',
+                    'Returns 0 for all blank range',
+                    'Use MINIFS for conditional minimum'
+                ]
+            },
+            'MAX': {
+                name: 'MAX',
+                description: 'Returns largest value in range',
+                syntax: '=MAX(number1, [number2], ...)',
+                examples: [
+                    '=MAX(A:A) → Maximum value in column',
+                    '=MAX(A1:A100) → Max in range'
+                ],
+                tips: [
+                    'Ignores text and blank cells',
+                    'Opposite of MIN',
+                    'Great for finding peaks'
+                ]
+            },
+            'LARGE': {
+                name: 'LARGE',
+                description: 'Returns the k-th LARGEST value',
+                syntax: '=LARGE(range, k)',
+                examples: [
+                    '=LARGE(A:A, 1) → Largest (same as MAX)',
+                    '=LARGE(A:A, 2) → 2nd largest',
+                    '=LARGE(A:A, 3) → 3rd largest'
+                ],
+                tips: [
+                    'k=1 is MAX, k=2 is 2nd highest',
+                    'Great for rankings',
+                    'Pair with SMALL for ranges'
+                ]
+            },
+            'SMALL': {
+                name: 'SMALL',
+                description: 'Returns the k-th SMALLEST value',
+                syntax: '=SMALL(range, k)',
+                examples: [
+                    '=SMALL(A:A, 1) → Smallest (like MIN)',
+                    '=SMALL(A:A, 2) → 2nd smallest',
+                    '=SMALL(A:A, 3) → 3rd smallest'
+                ],
+                tips: [
+                    'k=1 is MIN, k=2 is 2nd smallest',
+                    'Opposite of LARGE',
+                    'Find bottom performers'
+                ]
+            },
+            'VLOOKUP': {
+                name: 'VLOOKUP',
+                description: 'Searches column and returns value from same row',
+                syntax: '=VLOOKUP(lookup_value, table_array, col_index_num, [range_lookup])',
+                examples: [
+                    '=VLOOKUP(A2, B:D, 3, FALSE) → Exact match',
+                    '=VLOOKUP("Apple", prices, 2, FALSE)',
+                    '=IFERROR(VLOOKUP(...), "Not Found")'
+                ],
+                tips: [
+                    'LEFTMOST column is searched',
+                    'FALSE = exact match (recommended)',
+                    'Column must be to the RIGHT',
+                    'Consider XLOOKUP (more powerful)'
+                ]
+            },
+            'HLOOKUP': {
+                name: 'HLOOKUP',
+                description: 'Horizontal lookup - searches row and returns column',
+                syntax: '=HLOOKUP(lookup_value, table_array, row_index_num, [range_lookup])',
+                examples: [
+                    '=HLOOKUP("Price", A1:Z5, 3, FALSE)',
+                    '=HLOOKUP(month, data_table, 2, FALSE)'
+                ],
+                tips: [
+                    'TOP row is searched',
+                    'Opposite of VLOOKUP',
+                    'Use for horizontal data layout'
+                ]
+            },
+            'XLOOKUP': {
+                name: 'XLOOKUP',
+                description: 'Modern lookup - works left/right, handles errors',
+                syntax: '=XLOOKUP(lookup_value, lookup_array, return_array, [if_not_found], [match_mode], [search_mode])',
+                examples: [
+                    '=XLOOKUP(A2, B:B, C:C) → Simple lookup',
+                    '=XLOOKUP(A2, B:B, C:C, "Not Found") → With default',
+                    '=XLOOKUP(A2, B:B, C:C, , -1) → Exact match, search backwards'
+                ],
+                tips: [
+                    'Better than VLOOKUP (newer)',
+                    'No column index needed',
+                    'Works LEFT or RIGHT',
+                    'Built-in error handling'
+                ]
+            },
+            'LOOKUP': {
+                name: 'LOOKUP',
+                description: 'Searches and returns value (simplified version)',
+                syntax: '=LOOKUP(lookup_value, lookup_array, return_array)',
+                examples: [
+                    '=LOOKUP(A2, B:B, C:C)',
+                    '=LOOKUP(score, threshold_range, result_range)'
+                ],
+                tips: [
+                    'Simpler than VLOOKUP',
+                    'Arrays must be in order',
+                    'Less flexible than XLOOKUP'
+                ]
+            },
+            'INDEX': {
+                name: 'INDEX',
+                description: 'Returns value from specific position in range',
+                syntax: '=INDEX(array, [row_num], [column_num])',
+                examples: [
+                    '=INDEX(A:A, 5) → 5th value in column A',
+                    '=INDEX(A1:C10, 2, 3) → Row 2, Column 3',
+                    '=INDEX(C:C, MATCH(A2, A:A, 0)) → Combined with MATCH'
+                ],
+                tips: [
+                    'Often paired with MATCH',
+                    'More flexible than VLOOKUP',
+                    'Can work left or right'
+                ]
+            },
+            'MATCH': {
+                name: 'MATCH',
+                description: 'Returns POSITION of value in range',
+                syntax: '=MATCH(lookup_value, lookup_array, [match_type])',
+                examples: [
+                    '=MATCH(A2, B:B, 0) → Position of exact match',
+                    '=INDEX(C:C, MATCH(A2, A:A, 0)) → Find position then get value',
+                    '=MATCH("Apple", A:A, 0) → Row number of Apple'
+                ],
+                tips: [
+                    'Returns row/column NUMBER, not value',
+                    '0 = exact match, 1 = <=, -1 = >=',
+                    'Pair with INDEX for power lookups'
+                ]
+            },
+            'OFFSET': {
+                name: 'OFFSET',
+                description: 'Returns value from offset position relative to cell',
+                syntax: '=OFFSET(reference, rows, cols, [height], [width])',
+                examples: [
+                    '=OFFSET(A1, 2, 3) → 2 rows down, 3 cols right',
+                    '=OFFSET(A1, 0, 1) → 1 column right, same row',
+                    '=SUM(OFFSET(A1, 0, 0, 5, 1)) → Sum 5x1 range'
+                ],
+                tips: [
+                    'Advanced but powerful',
+                    'Useful for dynamic ranges',
+                    'Can build expanding ranges'
+                ]
+            },
+            'INDIRECT': {
+                name: 'INDIRECT',
+                description: 'References cell using text string',
+                syntax: '=INDIRECT(cell_ref_as_text)',
+                examples: [
+                    '=INDIRECT("A"&ROW()) → Dynamic row reference',
+                    '=INDIRECT(A1) → If A1="B2", returns B2 value',
+                    '=SUM(INDIRECT("A1:A"&ROWS(A:A)))'
+                ],
+                tips: [
+                    'Create dynamic cell references',
+                    'Combine with string functions',
+                    'Advanced: cascade dropdowns'
+                ]
+            },
+            'IF': {
+                name: 'IF',
+                description: 'Returns value based on TRUE/FALSE condition',
+                syntax: '=IF(condition, value_if_true, [value_if_false])',
+                examples: [
+                    '=IF(A1>50, "Pass", "Fail")',
+                    '=IF(A1="Apple", "Fruit", "Other")',
+                    '=IF(A1="", "Empty", A1)'
+                ],
+                tips: [
+                    'Can be nested: =IF(A1>100, "High", IF(A1>50, "Med", "Low"))',
+                    'Returns FALSE if no value_if_false',
+                    'Use IFS() for multiple conditions'
+                ]
+            },
+            'IFS': {
+                name: 'IFS',
+                description: 'Returns value based on FIRST TRUE condition',
+                syntax: '=IFS(condition1, value1, [condition2, value2], ...)',
+                examples: [
+                    '=IFS(A1>100, "High", A1>50, "Medium", TRUE, "Low")',
+                    '=IFS(A1="A", "Grade A", A1="B", "Grade B", TRUE, "Other")',
+                    '=IFS(sales>10000, 0.15, sales>5000, 0.10, TRUE, 0.05)'
+                ],
+                tips: [
+                    'Cleaner than nested IFs',
+                    'Use TRUE as final catch-all',
+                    'Evaluates conditions in order'
+                ]
+            },
+            'AND': {
+                name: 'AND',
+                description: 'Returns TRUE if ALL conditions are TRUE',
+                syntax: '=AND(logical1, [logical2], ...)',
+                examples: [
+                    '=AND(A1>50, B1<100) → Both must be true',
+                    '=IF(AND(A1>10, A1<20), "In range", "Out")',
+                    '=AND(A1="Yes", B1>0, C1<>"") → All must be true'
+                ],
+                tips: [
+                    'Opposite of OR',
+                    'ALL conditions must be TRUE',
+                    'Great with IF for complex logic'
+                ]
+            },
+            'OR': {
+                name: 'OR',
+                description: 'Returns TRUE if ANY condition is TRUE',
+                syntax: '=OR(logical1, [logical2], ...)',
+                examples: [
+                    '=OR(A1=1, A1=2, A1=3) → At least one must be true',
+                    '=IF(OR(A1="Yes", B1="Yes"), "Approved", "Denied")',
+                    '=OR(A1>100, B1>100, C1>100) → Any true'
+                ],
+                tips: [
+                    'Opposite of AND',
+                    'Only ONE condition needs TRUE',
+                    'Useful for OR logic in IF'
+                ]
+            },
+            'NOT': {
+                name: 'NOT',
+                description: 'Reverses logical value - TRUE becomes FALSE',
+                syntax: '=NOT(logical)',
+                examples: [
+                    '=NOT(A1>50) → TRUE if A1 is NOT greater than 50',
+                    '=IF(NOT(ISBLANK(A1)), A1, "Empty")',
+                    '=NOT(OR(A1="", B1="")) → Both must have values'
+                ],
+                tips: [
+                    'Negates a condition',
+                    'Useful with ISBLANK, ISERROR',
+                    'Keep logic simple'
+                ]
+            },
+            'TRIM': {
+                name: 'TRIM',
+                description: 'Removes extra spaces from text',
+                syntax: '=TRIM(text)',
+                examples: [
+                    '=TRIM("  hello  ") → "hello"',
+                    '=TRIM(A1) → Cleans A1',
+                    '=TRIM(LOWER(A1)) → Lowercase and trim'
+                ],
+                tips: [
+                    'Removes leading/trailing spaces',
+                    'Also removes extra internal spaces',
+                    'Great for cleaning data'
+                ]
+            },
+            'LEN': {
+                name: 'LEN',
+                description: 'Returns number of characters in text',
+                syntax: '=LEN(text)',
+                examples: [
+                    '=LEN("Hello") → 5',
+                    '=LEN(A1) → Character count of A1',
+                    '=IF(LEN(A1)>5, "Long", "Short")'
+                ],
+                tips: [
+                    'Counts all characters including spaces',
+                    'Useful for validation',
+                    'Returns 0 for blank cells'
+                ]
+            },
+            'LEFT': {
+                name: 'LEFT',
+                description: 'Returns leftmost characters from text',
+                syntax: '=LEFT(text, num_chars)',
+                examples: [
+                    '=LEFT("Hello", 3) → "Hel"',
+                    '=LEFT(A1, 5) → First 5 chars of A1',
+                    '=LEFT(date, 4) → Year from "2024-01-01"'
+                ],
+                tips: [
+                    'Extract from left side',
+                    'Pair with RIGHT and MID',
+                    'Useful for text parsing'
+                ]
+            },
+            'RIGHT': {
+                name: 'RIGHT',
+                description: 'Returns rightmost characters from text',
+                syntax: '=RIGHT(text, num_chars)',
+                examples: [
+                    '=RIGHT("Hello", 3) → "llo"',
+                    '=RIGHT(A1, 2) → Last 2 characters',
+                    '=RIGHT(email, 4) → Domain from email'
+                ],
+                tips: [
+                    'Extract from right side',
+                    'Opposite of LEFT',
+                    'Great for extracting suffixes'
+                ]
+            },
+            'MID': {
+                name: 'MID',
+                description: 'Extracts characters from middle of text',
+                syntax: '=MID(text, start_num, num_chars)',
+                examples: [
+                    '=MID("Hello", 2, 3) → "ell"',
+                    '=MID(A1, 3, 4) → 4 chars starting at position 3',
+                    '=MID(date, 6, 2) → Month from "2024-01-15"'
+                ],
+                tips: [
+                    'Perfect for parsing strings',
+                    'start_num is 1-based (not 0)',
+                    'Combine with FIND for dynamic extraction'
+                ]
+            },
+            'LOWER': {
+                name: 'LOWER',
+                description: 'Converts text to lowercase',
+                syntax: '=LOWER(text)',
+                examples: [
+                    '=LOWER("HELLO") → "hello"',
+                    '=LOWER(A1) → Lowercase version',
+                    '=LOWER(TRIM(A1)) → Clean and lowercase'
+                ],
+                tips: [
+                    'Useful for standardizing data',
+                    'Pair with UPPER and PROPER',
+                    'Case-insensitive comparison'
+                ]
+            },
+            'UPPER': {
+                name: 'UPPER',
+                description: 'Converts text to UPPERCASE',
+                syntax: '=UPPER(text)',
+                examples: [
+                    '=UPPER("hello") → "HELLO"',
+                    '=UPPER(A1) → Uppercase version',
+                    '=IF(UPPER(A1)="APPLE", "Match", "No")'
+                ],
+                tips: [
+                    'Opposite of LOWER',
+                    'Great for standardizing entries',
+                    'Force uppercase for comparisons'
+                ]
+            },
+            'PROPER': {
+                name: 'PROPER',
+                description: 'Converts text to Title Case (first letter capitalized)',
+                syntax: '=PROPER(text)',
+                examples: [
+                    '=PROPER("hello world") → "Hello World"',
+                    '=PROPER(A1) → Title case version',
+                    '=PROPER("JOHN SMITH") → "John Smith"'
+                ],
+                tips: [
+                    'Perfect for name formatting',
+                    'Capitalizes first letter of each word',
+                    'Useful for professional presentation'
+                ]
+            },
+            'CONCAT': {
+                name: 'CONCAT',
+                description: 'Combines text from multiple cells/strings',
+                syntax: '=CONCAT(text1, [text2], ...)',
+                examples: [
+                    '=CONCAT(A1, " ", B1) → Combines with space',
+                    '=CONCAT("Hello ", A1) → Prefix text',
+                    '=CONCAT(A1, "-", B1, "-", C1)'
+                ],
+                tips: [
+                    'Modern version of CONCATENATE',
+                    'Use & operator as shortcut: =A1&" "&B1',
+                    'Combine with TEXTJOIN for more power'
+                ]
+            },
+            'CONCATENATE': {
+                name: 'CONCATENATE',
+                description: 'Combines text (older version of CONCAT)',
+                syntax: '=CONCATENATE(text1, [text2], ...)',
+                examples: [
+                    '=CONCATENATE(A1, B1)',
+                    '=CONCATENATE("Full Name: ", A1, " ", B1)'
+                ],
+                tips: [
+                    'CONCAT is newer (preferred)',
+                    'Same as & operator: =A1&B1',
+                    'Use TEXTJOIN for delimiter between all'
+                ]
+            },
+            'TEXTJOIN': {
+                name: 'TEXTJOIN',
+                description: 'Joins text with delimiter, skips blanks',
+                syntax: '=TEXTJOIN(delimiter, ignore_empty, text1, [text2], ...)',
+                examples: [
+                    '=TEXTJOIN(", ", TRUE, A:A) → CSV list from column',
+                    '=TEXTJOIN("-", TRUE, A1:C1) → Dash-separated',
+                    '=TEXTJOIN("; ", TRUE, IF(B:B>50, A:A, ""))'
+                ],
+                tips: [
+                    'Can use ranges (not just cells)',
+                    'ignore_empty=TRUE skips blanks',
+                    'Works with array formulas'
+                ]
+            },
+            'TODAY': {
+                name: 'TODAY',
+                description: 'Returns today\'s date',
+                syntax: '=TODAY()',
+                examples: [
+                    '=TODAY() → Current date',
+                    '=TODAY() - 7 → Date 7 days ago',
+                    '=IF(A1<TODAY(), "Expired", "Active")'
+                ],
+                tips: [
+                    'No parameters needed',
+                    'Recalculates automatically daily',
+                    'Returns serial number (format as date)'
+                ]
+            },
+            'NOW': {
+                name: 'NOW',
+                description: 'Returns current date and time',
+                syntax: '=NOW()',
+                examples: [
+                    '=NOW() → Current date and time',
+                    '=NOW() + 1 → Tomorrow this time',
+                    '=INT(NOW()) → Just the date'
+                ],
+                tips: [
+                    'Updates whenever sheet recalculates',
+                    'Includes time component',
+                    'Use TEXT() to format: =TEXT(NOW(), "HH:MM:SS")'
+                ]
+            },
+            'DATEDIF': {
+                name: 'DATEDIF',
+                description: 'Calculates difference between two dates',
+                syntax: '=DATEDIF(start_date, end_date, unit)',
+                examples: [
+                    '=DATEDIF(A1, B1, "D") → Days between',
+                    '=DATEDIF(A1, TODAY(), "M") → Months ago',
+                    '=DATEDIF(birth, TODAY(), "Y") → Age in years'
+                ],
+                tips: [
+                    'Units: "D"=days, "M"=months, "Y"=years',
+                    'Perfect for age calculations',
+                    '"MD"=days ignoring month/year, "YD"=days ignoring year'
+                ]
+            },
+            'EDATE': {
+                name: 'EDATE',
+                description: 'Returns date that is months before/after given date',
+                syntax: '=EDATE(start_date, months)',
+                examples: [
+                    '=EDATE(TODAY(), 3) → 3 months from now',
+                    '=EDATE(A1, -6) → 6 months ago',
+                    '=EDATE(start, 12) → Same date next year'
+                ],
+                tips: [
+                    'Positive = future, negative = past',
+                    'Maintains day of month',
+                    'Great for recurring dates'
+                ]
+            },
+            'EOMONTH': {
+                name: 'EOMONTH',
+                description: 'Returns last day of month',
+                syntax: '=EOMONTH(start_date, months)',
+                examples: [
+                    '=EOMONTH(A1, 0) → Last day of current month',
+                    '=EOMONTH(A1, 1) → Last day of next month',
+                    '=EOMONTH(TODAY(), -1) → Last day of previous month'
+                ],
+                tips: [
+                    'Always returns last day (28-31)',
+                    'Useful for financial reports',
+                    'Combine with DATE for ranges'
+                ]
+            },
+            'ROUND': {
+                name: 'ROUND',
+                description: 'Rounds number to specified decimal places',
+                syntax: '=ROUND(number, num_digits)',
+                examples: [
+                    '=ROUND(3.14159, 2) → 3.14',
+                    '=ROUND(A1, 0) → Round to integer',
+                    '=ROUND(A1, -1) → Round to nearest 10'
+                ],
+                tips: [
+                    'num_digits=0: no decimals',
+                    'Negative: round to tens, hundreds, etc.',
+                    'Combines with ROUNDUP and ROUNDDOWN'
+                ]
+            },
+            'ROUNDUP': {
+                name: 'ROUNDUP',
+                description: 'Rounds UP to specified decimal places',
+                syntax: '=ROUNDUP(number, num_digits)',
+                examples: [
+                    '=ROUNDUP(3.14, 1) → 3.2',
+                    '=ROUNDUP(99, -1) → 100'
+                ],
+                tips: [
+                    'Always rounds UP (away from 0)',
+                    'Useful for conservative estimates',
+                    'Opposite of ROUNDDOWN'
+                ]
+            },
+            'ROUNDDOWN': {
+                name: 'ROUNDDOWN',
+                description: 'Rounds DOWN to specified decimal places',
+                syntax: '=ROUNDDOWN(number, num_digits)',
+                examples: [
+                    '=ROUNDDOWN(3.99, 1) → 3.9',
+                    '=ROUNDDOWN(99, -1) → 90'
+                ],
+                tips: [
+                    'Always rounds DOWN (toward 0)',
+                    'Useful for conservative estimates',
+                    'Opposite of ROUNDUP'
+                ]
+            },
+            'ABS': {
+                name: 'ABS',
+                description: 'Returns absolute value (positive)',
+                syntax: '=ABS(number)',
+                examples: [
+                    '=ABS(-5) → 5',
+                    '=ABS(A1-B1) → Difference ignoring sign',
+                    '=IF(ABS(variance)>10, "Alert", "OK")'
+                ],
+                tips: [
+                    'Removes negative sign',
+                    'Perfect for comparing magnitudes',
+                    'Used for variance calculations'
+                ]
+            },
+            'MOD': {
+                name: 'MOD',
+                description: 'Returns remainder after division',
+                syntax: '=MOD(number, divisor)',
+                examples: [
+                    '=MOD(10, 3) → 1 (remainder)',
+                    '=IF(MOD(A1, 2)=0, "Even", "Odd")',
+                    '=MOD(ROW(), 2) → Alternating colors'
+                ],
+                tips: [
+                    'Great for odd/even detection',
+                    'Useful for cycling patterns',
+                    'ROW() alternation: 1,0,1,0...'
+                ]
+            },
+            'POWER': {
+                name: 'POWER',
+                description: 'Raises number to power (exponentiation)',
+                syntax: '=POWER(number, power)',
+                examples: [
+                    '=POWER(2, 3) → 8 (2³)',
+                    '=POWER(A1, 2) → Square',
+                    '=POWER(10, -1) → 0.1'
+                ],
+                tips: [
+                    'Same as ^ operator: =2^3',
+                    'Useful for exponential growth',
+                    'Negative power = fraction'
+                ]
+            },
+            'SUMPRODUCT': {
+                name: 'SUMPRODUCT',
+                description: 'Multiplies corresponding values then sums (advanced)',
+                syntax: '=SUMPRODUCT(array1, [array2], ...)',
+                examples: [
+                    '=SUMPRODUCT(A:A, B:B) → Sum of products',
+                    '=SUMPRODUCT((A:A>50)*(B:B="Yes")) → Count with conditions',
+                    '=SUMPRODUCT(C:C, --(A:A="Sold")) → Conditional sum'
+                ],
+                tips: [
+                    'Can replace SUMIFS in some cases',
+                    'Very powerful for complex calculations',
+                    'Great for weighted averages'
+                ]
             }
-        ];
+        };
 
-        const formulaExamples = [
-            {
-                formula: `=VLOOKUP(A2,B:D,3,FALSE)`,
-                issue: "Returns #NAME? error - check for typo"
-            },
-            {
-                formula: `=VLOOKUP(A2,Sheet1!B:D,2,0)`,
-                issue: "Should return column 3 from range, not 2"
-            },
-            {
-                formula: `=IF(A1="","empty",A1*2)`,
-                issue: "Can't multiply text - use VALUE() or check type first"
-            },
-            {
-                formula: `=INDEX(A:A,MATCH(C2,B:B,0))`,
-                issue: "Better approach with dynamic ranges - use IFERROR()"
-            }
-        ];
-
-        function switchTab(tab) {
-            document.querySelectorAll('.content-section').forEach(e => e.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active'));
-            
-            document.getElementById(tab).classList.add('active');
-            event.target.classList.add('active');
+        function loadExample(formula) {
+            document.getElementById('formulaInput').value = formula;
         }
 
-        function loadSQLExample(index) {
-            document.getElementById('sqlInput').value = sqlExamples[index].query;
+        function clearAll() {
+            document.getElementById('formulaInput').value = '';
+            document.getElementById('resultsContainer').classList.add('hidden');
+            document.getElementById('placeholder').style.display = 'block';
         }
 
-        function loadFormulaExample(index) {
-            document.getElementById('formulaInput').value = formulaExamples[index].formula;
-        }
-
-        async function analyzeSQL() {
-            const sql = document.getElementById('sqlInput').value.trim();
-            if (!sql) {
-                alert('Please paste a SQL query first!');
-                return;
-            }
-
-            const spinner = document.getElementById('sqlSpinner');
-            const btnText = document.getElementById('sqlBtnText');
-            spinner.style.display = 'inline-block';
-            btnText.textContent = 'Analyzing...';
-
-            // Simulate processing
-            await new Promise(resolve => setTimeout(resolve, 800));
-
-            try {
-                const analysis = analyzeSQLQuery(sql);
-                displaySQLResults(analysis);
-            } catch (error) {
-                document.getElementById('sqlResults').innerHTML = `
-                    <div class="result-card error">
-                        <div class="result-label">Error</div>
-                        <p>${error.message}</p>
-                    </div>
-                `;
-                document.getElementById('sqlResults').classList.remove('hidden');
-            } finally {
-                spinner.style.display = 'none';
-                btnText.textContent = '🔍 Analyze & Fix';
-            }
-        }
-
-        function analyzeSQLQuery(sql) {
-            let analysis = "📊 SQL QUERY ANALYSIS\n";
-            analysis += "═".repeat(50) + "\n\n";
-            
-            const lowerSql = sql.toLowerCase();
-            const issues = [];
-            const fixes = [];
-            let corrected = sql;
-            
-            // Check for MISSING JOIN ON CLAUSE
-            if (lowerSql.includes('join') && !lowerSql.includes('on')) {
-                issues.push("❌ CRITICAL: JOIN without ON clause - Query will FAIL");
-                fixes.push("Add ON condition: ... JOIN orders o ON u.id = o.user_id");
-                // Try to auto-detect and fix
-                corrected = corrected.replace(/JOIN\s+(\w+)/gi, "JOIN $1 o ON table1.id = o.id");
-            }
-            
-            // Check for GROUP BY without aggregation
-            if (lowerSql.includes('group by')) {
-                const selectMatch = sql.match(/SELECT\s+(.+?)\s+FROM/i);
-                if (selectMatch) {
-                    const selectCols = selectMatch[1];
-                    const hasAggregation = /COUNT|SUM|AVG|MAX|MIN|GROUP_CONCAT/i.test(selectCols);
-                    if (!hasAggregation && selectCols.split(',').length > 1) {
-                        issues.push("⚠️  GROUP BY: Non-aggregated columns without aggregation function");
-                        fixes.push("Use: SELECT product_id, COUNT(*) FROM orders GROUP BY product_id");
-                    }
-                }
-            }
-            
-            // Check for type mismatch (string comparison with number)
-            if (lowerSql.match(/where\s+\w+\s*=\s*'[\d.]+'/i)) {
-                issues.push("⚠️  Type comparison - comparing number with string literal");
-                fixes.push("Remove quotes: WHERE age = 25 (not '25')");
-                corrected = corrected.replace(/=\s*'(\d+)'/g, "= $1");
-            }
-            
-            // Check for N+1 subquery performance issue
-            if (lowerSql.includes('in (select')) {
-                issues.push("⚠️  Performance: Subquery in WHERE clause (possible N+1 issue)");
-                fixes.push("Replace with JOIN for better performance");
-            }
-            
-            // Check for SELECT *
-            if (lowerSql.includes('select *')) {
-                issues.push("⚡ SELECT * - Retrieves unnecessary columns");
-                fixes.push("Specify columns: SELECT id, name, email FROM users");
-            }
-            
-            // Check for WHERE 1=1 (code smell)
-            if (lowerSql.includes('where 1=1')) {
-                issues.push("ℹ️  Code smell: WHERE 1=1 - Use dynamic query building instead");
-                fixes.push("Clean up: WHERE actual_condition");
-                corrected = corrected.replace(/WHERE\s+1\s*=\s*1\s+AND\s+/gi, "WHERE ");
-            }
-            
-            // Check for unmatched parentheses
-            const openParen = (sql.match(/\(/g) || []).length;
-            const closeParen = (sql.match(/\)/g) || []).length;
-            if (openParen !== closeParen) {
-                issues.push(`❌ Unmatched parentheses: ${openParen} open vs ${closeParen} close`);
-                fixes.push("Count and balance parentheses in your query");
-            }
-            
-            // Check for missing semicolon
-            if (!sql.trim().endsWith(';')) {
-                issues.push("ℹ️  Missing semicolon (not critical but good practice)");
-                fixes.push("Add ; at end: ... WHERE id = 5;");
-            }
-            
-            // Analysis output
-            analysis += "1️⃣  SYNTAX & VALIDITY\n";
-            analysis += "─".repeat(50) + "\n";
-            const hasCritical = issues.some(i => i.includes('❌'));
-            if (hasCritical) {
-                analysis += "🚨 CRITICAL ERRORS FOUND - Query will NOT work!\n\n";
-            } else if (issues.length > 0) {
-                analysis += "⚠️  WARNINGS FOUND - See below\n\n";
-            } else {
-                analysis += "✅ Syntax appears valid\n\n";
-            }
-            
-            // Issues found
-            analysis += "2️⃣  ❌ ERRORS & ISSUES\n";
-            analysis += "─".repeat(50) + "\n";
-            if (issues.length > 0) {
-                issues.forEach((issue, idx) => {
-                    analysis += `${idx + 1}. ${issue}\n`;
-                });
-            } else {
-                analysis += "✅ No issues detected\n";
-            }
-            analysis += "\n";
-            
-            // CORRECTED QUERY - PROMINENT
-            analysis += "3️⃣  ✅ CORRECTED QUERY (USE THIS!)\n";
-            analysis += "─".repeat(50) + "\n";
-            analysis += "```sql\n" + corrected + "\n```\n\n";
-            
-            // Detailed fixes
-            analysis += "4️⃣  WHAT TO FIX\n";
-            analysis += "─".repeat(50) + "\n";
-            if (fixes.length > 0) {
-                fixes.forEach((fix, idx) => {
-                    analysis += `${idx + 1}. ${fix}\n`;
-                });
-            } else {
-                analysis += "✅ Your query looks good!\n";
-            }
-            analysis += "\n";
-            
-            // Learning tips
-            analysis += "5️⃣  💡 BEST PRACTICES\n";
-            analysis += "─".repeat(50) + "\n";
-            analysis += "✨ SQL Tips:\n";
-            analysis += "   • Always use specific columns (not SELECT *)\n";
-            analysis += "   • Use explicit JOIN syntax with ON clauses\n";
-            analysis += "   • Test with LIMIT first: ... LIMIT 10;\n";
-            analysis += "   • Use indexes on WHERE and JOIN columns\n";
-            analysis += "   • Avoid subqueries in WHERE - use JOINs\n";
-            analysis += "   • Use EXPLAIN to see query performance\n";
-            
-            return analysis;
-        }
-
-        async function analyzeFormula() {
+        function analyzeFormula() {
             const formula = document.getElementById('formulaInput').value.trim();
-            const type = document.getElementById('formulaType').value;
             
             if (!formula) {
                 alert('Please paste a formula first!');
                 return;
             }
 
-            const spinner = document.getElementById('formulaSpinner');
-            const btnText = document.getElementById('formulaBtnText');
+            const spinner = document.getElementById('spinner');
+            const btnText = document.getElementById('btnText');
+            
             spinner.style.display = 'inline-block';
             btnText.textContent = 'Analyzing...';
 
             // Simulate processing
-            await new Promise(resolve => setTimeout(resolve, 800));
-
-            try {
-                const analysis = analyzeFormulaLogic(formula, type);
-                displayFormulaResults(analysis);
-            } catch (error) {
-                document.getElementById('formulaResults').innerHTML = `
-                    <div class="result-card error">
-                        <div class="result-label">Error</div>
-                        <p>${error.message}</p>
-                    </div>
-                `;
-                document.getElementById('formulaResults').classList.remove('hidden');
-            } finally {
+            setTimeout(() => {
+                const analysis = performAnalysis(formula);
+                displayResults(analysis);
+                
                 spinner.style.display = 'none';
-                btnText.textContent = '🔍 Analyze & Fix';
-            }
+                btnText.textContent = '🔍 Analyze Formula';
+            }, 600);
         }
 
-        function analyzeFormulaLogic(formula, type) {
-            let analysis = "📊 FORMULA ANALYSIS\n";
-            analysis += "═".repeat(50) + "\n\n";
+        function performAnalysis(formula) {
+            const lowerFormula = formula.toLowerCase();
+            let analysis = {
+                formula: formula,
+                functions: [],
+                issues: [],
+                fixes: [],
+                details: [],
+                hasErrors: false
+            };
+
+            // Extract all function names
+            const funcPattern = /([A-Z_]+)\s*\(/gi;
+            let match;
+            const functionsFound = new Set();
             
-            const lowerFormula = formula.toLowerCase().trim();
-            const issues = [];
-            const fixes = [];
-            let correctedFormula = formula;
-            let hasErrors = false;
-            let whatItDoes = "";
-            let stepByStep = "";
-            let bestPractices = "";
+            while ((match = funcPattern.exec(formula)) !== null) {
+                const func = match[1].toUpperCase();
+                if (!functionsFound.has(func)) {
+                    functionsFound.add(func);
+                    analysis.functions.push(func);
+                }
+            }
+
+            // Check each function
+            analysis.functions.forEach(func => {
+                if (formulaDictionary[func]) {
+                    analysis.details.push({
+                        func: func,
+                        info: formulaDictionary[func]
+                    });
+                } else {
+                    analysis.issues.push(`⚠️ "${func}" - Unknown or unsupported function`);
+                }
+            });
+
+            // Validate syntax
+            const openParen = (formula.match(/\(/g) || []).length;
+            const closeParen = (formula.match(/\)/g) || []).length;
             
-            // Extract the main function name CORRECTLY
-            const funcMatch = lowerFormula.match(/=\s*([a-z_]+)\s*\(/i);
-            const mainFunc = funcMatch ? funcMatch[1].toUpperCase() : "UNKNOWN";
-            
-            // ===== DETECT ACTUAL FORMULA TYPE WITH EXACT MATCHING =====
-            if (mainFunc === 'COUNTIF') {
-                whatItDoes = "This formula counts cells in a range that match a single criteria.";
-                
-                // Validate COUNTIF syntax
-                const commaCount = (formula.match(/,/g) || []).length;
-                if (commaCount < 1) {
-                    issues.push("❌ COUNTIF requires 2 parameters: range and criteria");
-                    fixes.push("Format: =COUNTIF(range, criteria)");
-                    fixes.push("Example: =COUNTIF(A:A, A2) or =COUNTIF(A2:A100, \"Apple\")");
-                    hasErrors = true;
+            if (openParen !== closeParen) {
+                analysis.hasErrors = true;
+                analysis.issues.push(`❌ Mismatched parentheses: ${openParen} open vs ${closeParen} close`);
+                analysis.fixes.push(`Count parentheses carefully`);
+            }
+
+            // Check for missing commas in common patterns
+            if (formula.match(/COUNTIFS\s*\([^,]*"[^"]*"[^,]*(["'])/)) {
+                // Might be missing comma
+                if (!formula.match(/COUNTIFS\s*\([^,]*,[^,]*,/)) {
+                    analysis.issues.push(`❌ COUNTIFS may be missing comma between range and criteria`);
                 }
-                
-                // Check for invalid range like :A
-                if (formula.includes(':A') || formula.includes('(:')) {
-                    issues.push("❌ INVALID RANGE: ':A' is not a valid range");
-                    fixes.push("Missing starting cell - should be A:A (entire column) or A1:A100 (specific range)");
-                    fixes.push("Correct: =COUNTIF(A:A, A2) or =COUNTIF(A1:A100, \"value\")");
-                    correctedFormula = formula.replace(/:A(?![0-9])/g, "A:A").replace(/\(:/, "(A:");
-                    hasErrors = true;
-                }
-                
-                // Check for empty criteria
-                if (formula.match(/,\s*\)/)) {
-                    issues.push("❌ Missing criteria parameter");
-                    fixes.push("Add criteria: =COUNTIF(A:A, \"value\") or =COUNTIF(A:A, A2)");
-                    hasErrors = true;
-                }
-                
-                if (!hasErrors) {
-                    stepByStep = "Step 1: Define the range to search (A:A means entire column A)\nStep 2: Define the criteria to match (A2 or \"value\")\nStep 3: Count all cells that match the criteria\nStep 4: Return the count\n\nExample:\nIf A2 = 'Apple' and column A has: Apple, Banana, Apple, Apple\nResult = 3 (three apples found)";
-                }
-                
-                bestPractices = "✨ COUNTIF Tips:\n   • For multiple criteria, use COUNTIFS instead\n   • Use specific ranges (A1:A100) not entire columns for speed\n   • Criteria can be a value: =COUNTIF(A:A, \"Apple\")\n   • Or reference a cell: =COUNTIF(A:A, A2)\n   • Supports wildcards: =COUNTIF(A:A, \"*Apple*\")";
-                
-            } else if (mainFunc === 'COUNTIFS') {
-                whatItDoes = "This formula counts cells that meet multiple criteria (multi-criteria COUNTIF).";
-                
-                const commaCount = (formula.match(/,/g) || []).length;
-                if (commaCount < 2) {
-                    issues.push("❌ COUNTIFS requires at least 2 range/criteria pairs");
-                    fixes.push("Format: =COUNTIFS(range1, criteria1, range2, criteria2, ...)");
-                    fixes.push("Example: =COUNTIFS(A:A, \"Apple\", B:B, \">50\")");
-                    hasErrors = true;
-                } else {
-                    stepByStep = "Step 1: Check range1 against criteria1\nStep 2: AND check range2 against criteria2\nStep 3: Count rows where ALL criteria match\nStep 4: Return the count\n\nExample:\n=COUNTIFS(A:A, \"Apple\", B:B, \">100\")\nFinds rows where column A = Apple AND column B > 100";
-                }
-                
-                bestPractices = "✨ COUNTIFS Tips:\n   • ALL criteria must be TRUE (AND logic)\n   • Use COUNTIF for single criteria\n   • Can have unlimited criteria pairs\n   • Example: =COUNTIFS(A:A, A2, B:B, \">50\", C:C, \"<100\")";
-                
-            } else if (mainFunc === 'VLOOKUP') {
-                whatItDoes = "This formula searches for a value and returns a match from another column.";
-                const commaCount = (formula.match(/,/g) || []).length;
-                if (commaCount < 3) {
-                    issues.push("❌ VLOOKUP incomplete - missing parameters");
-                    fixes.push("Format: =VLOOKUP(lookup_value, table_array, col_index_num, FALSE)");
-                    fixes.push("Example: =VLOOKUP(A2, B:D, 3, FALSE)");
-                    hasErrors = true;
-                    correctedFormula = formula.includes('FALSE') ? formula : formula.replace(/\)/, ", FALSE)");
-                } else {
-                    stepByStep = "Step 1: Look for the first parameter value\nStep 2: Search in the table array's first column\nStep 3: Return value from the specified column number\nStep 4: FALSE = exact match, TRUE = approximate match";
-                }
-                bestPractices = "✨ VLOOKUP Tips:\n   • Lookup column must be LEFTMOST in range\n   • Use FALSE for exact match (recommended)\n   • Wrap in IFERROR: =IFERROR(VLOOKUP(...), \"Not Found\")\n   • Modern alternative: Use XLOOKUP";
-                
-            } else if (mainFunc === 'IF') {
-                whatItDoes = "This formula checks a condition (TRUE/FALSE) and returns different values.";
-                const openParen = (formula.match(/\(/g) || []).length;
-                const closeParen = (formula.match(/\)/g) || []).length;
-                if (openParen !== closeParen) {
-                    issues.push("❌ Mismatched parentheses: " + openParen + " open, " + closeParen + " close");
-                    fixes.push("Check your parentheses are balanced");
-                    hasErrors = true;
-                } else {
-                    const commaCount = (formula.match(/,/g) || []).length;
-                    if (commaCount < 1) {
-                        issues.push("❌ IF requires at least 2 parameters: condition and value_if_true");
-                        fixes.push("Format: =IF(condition, value_if_true, value_if_false)");
-                        hasErrors = true;
-                    } else {
-                        stepByStep = "Step 1: Evaluate the condition\nStep 2: If TRUE, return first value\nStep 3: If FALSE, return second value (optional)\nStep 4: Display result";
+            }
+
+            // Detect nested formulas
+            const nestedCount = (formula.match(/\(/g) || []).length;
+            if (nestedCount > 2) {
+                analysis.details.push({
+                    func: 'NESTED',
+                    info: {
+                        name: 'Nested Formulas Detected',
+                        description: `This formula contains ${nestedCount} levels of nesting`,
+                        tips: ['Complex nested formulas can be hard to debug', 'Consider breaking into helper columns', 'Use IFERROR to catch errors']
                     }
-                }
-                bestPractices = "✨ IF Tips:\n   • Use nested IFs for multiple conditions\n   • Better: Use IFS() for cleaner code: =IFS(A1>100, \"High\", A1>50, \"Medium\", \"Low\")\n   • Combine with AND/OR: =IF(AND(A1>50, B1<100), \"Yes\", \"No\")\n   • Example: =IF(A1>100, \"High\", \"Low\")";
-                
-            } else if (mainFunc === 'SUMIF') {
-                whatItDoes = "This formula sums values in a range that meet a single criteria.";
-                stepByStep = "Step 1: Check range against criteria\nStep 2: Sum all matching cells\nStep 3: Return the total\n\nExample:\n=SUMIF(A:A, \"Apple\", B:B) sums B values where A = Apple";
-                bestPractices = "✨ SUMIF Tips:\n   • For multiple criteria, use SUMIFS\n   • Format: =SUMIF(range, criteria, sum_range)\n   • Supports comparison: =SUMIF(B:B, \">100\", C:C)";
-                
-            } else if (mainFunc === 'INDEX') {
-                whatItDoes = "This formula returns a value from a range at a specific position.";
-                stepByStep = "Step 1: Specify the range\nStep 2: Specify row number\nStep 3: Specify column number (optional)\nStep 4: Return the value at that position";
-                bestPractices = "✨ INDEX Tips:\n   • Often combined with MATCH: =INDEX(C:C, MATCH(A2, A:A, 0))\n   • Works with rows and columns\n   • More flexible than VLOOKUP";
-                
-            } else if (mainFunc === 'MATCH') {
-                whatItDoes = "This formula finds the position of a value in a range.";
-                stepByStep = "Step 1: Look for the value\nStep 2: Search the range\nStep 3: Return the position (row or column number)\n\nExample: MATCH('Apple', A:A, 0) returns 3 if Apple is in row 3";
-                bestPractices = "✨ MATCH Tips:\n   • Returns position number, not the value\n   • Often used with INDEX for lookups\n   • 0 = exact match, 1 = less than, -1 = greater than";
-                
-            } else if (mainFunc === 'SUM') {
-                whatItDoes = "This formula adds up numbers in the specified range.";
-                stepByStep = "Step 1: Select the range\nStep 2: Add all numeric values\nStep 3: Return the total\n\nExample: =SUM(A1:A100) adds all values from A1 to A100";
-                bestPractices = "✨ SUM Tips:\n   • Ignores text and blank cells\n   • Use SUMIF for conditional sums\n   • Use SUMIFS for multiple criteria\n   • Can sum multiple ranges: =SUM(A:A, C:C)";
-                
-            } else if (mainFunc === 'FILTER') {
-                whatItDoes = "This modern formula filters data based on conditions (Google Sheets & Excel 365+).";
-                stepByStep = "Step 1: Specify range to filter\nStep 2: Define filter condition\nStep 3: Returns entire filtered array";
-                bestPractices = "✨ FILTER Tips:\n   • Only in Google Sheets and Excel 365+\n   • Returns multiple rows/columns\n   • Can stack multiple FILTER functions\n   • Example: =FILTER(A:A, A:A>50)";
-                
-            } else if (mainFunc === 'XLOOKUP') {
-                whatItDoes = "This modern formula searches and returns matches (Excel 365 & Google Sheets).";
-                stepByStep = "Step 1: Look for value\nStep 2: Search range\nStep 3: Return matching value\nStep 4: Optional: return if not found";
-                bestPractices = "✨ XLOOKUP Tips:\n   • Newer, more powerful than VLOOKUP\n   • Works left or right\n   • Built-in error handling\n   • Example: =XLOOKUP(A2, B:B, C:C, \"Not Found\")";
-                
-            } else {
-                whatItDoes = `This formula uses the ${mainFunc} function to process data.`;
-                bestPractices = "✨ General Tips:\n   • Use parentheses for clarity\n   • Test with sample data\n   • Use absolute references ($) for fixed ranges\n   • Comment your complex formulas";
-            }
-            
-            // DETECT TYPOS IN CELL REFERENCES
-            if (/\d[A-Z]\d/i.test(formula)) {
-                const badRef = formula.match(/\d([A-Z])\d/i);
-                if (badRef) {
-                    issues.push(`❌ CRITICAL: Invalid cell reference "${badRef[0]}"`);
-                    fixes.push(`Cell references must start with letter. Change to: ${badRef[0].replace(/^(\d)/, '')}`);
-                    correctedFormula = formula.replace(/\d([A-Z])(\d)/i, '$1$2');
-                    hasErrors = true;
-                }
-            }
-            
-            // OUTPUT ANALYSIS
-            analysis += "1️⃣  WHAT THIS FORMULA DOES\n";
-            analysis += "─".repeat(50) + "\n";
-            analysis += whatItDoes + "\n\n";
-            
-            // Only show error section if there ARE errors
-            if (issues.length > 0) {
-                analysis += "2️⃣  ❌ ERRORS FOUND\n";
-                analysis += "─".repeat(50) + "\n";
-                issues.forEach((issue, idx) => {
-                    analysis += `${idx + 1}. ${issue}\n`;
                 });
-                analysis += "\n";
-                fixes.forEach((fix, idx) => {
-                    analysis += `   ✅ ${fix}\n`;
-                });
-                analysis += "\n";
-                
-                analysis += "3️⃣  ✅ CORRECTED FORMULA\n";
-                analysis += "─".repeat(50) + "\n";
-                analysis += "```\n" + correctedFormula + "\n```\n\n";
-            } else {
-                analysis += "2️⃣  ✅ FORMULA IS CORRECT\n";
-                analysis += "─".repeat(50) + "\n";
-                analysis += "No errors detected! This formula will work.\n\n";
             }
-            
-            // Step by step breakdown
-            if (stepByStep) {
-                analysis += "3️⃣  HOW IT WORKS (STEP-BY-STEP)\n";
-                analysis += "─".repeat(50) + "\n";
-                analysis += stepByStep + "\n\n";
-            }
-            
-            // Best practices
-            if (bestPractices) {
-                analysis += "4️⃣  💡 BEST PRACTICES\n";
-                analysis += "─".repeat(50) + "\n";
-                analysis += bestPractices + "\n";
-            }
-            
+
             return analysis;
         }
 
-        function displaySQLResults(analysis) {
-            const resultsDiv = document.getElementById('sqlResults');
-            const placeholder = document.getElementById('sqlPlaceholder');
+        function displayResults(analysis) {
+            const container = document.getElementById('resultsContainer');
+            const placeholder = document.getElementById('placeholder');
             
-            resultsDiv.innerHTML = `
-                <div class="result-card">
-                    <div class="result-label">✅ Analysis Complete</div>
-                    <div class="code-block" style="white-space: pre-wrap; font-size: 12px; line-height: 1.6;">
-${escapeHtml(analysis)}
+            let html = '';
+
+            // Your Formula
+            html += `<div class="result-section">
+                <div class="result-header">📝 Your Formula</div>
+                <div class="code-block">${escapeHtml(analysis.formula)}</div>
+            </div>`;
+
+            // Functions Found
+            if (analysis.functions.length > 0) {
+                html += `<div class="result-section">
+                    <div class="result-header success">✅ Functions Detected</div>
+                    <div class="result-content success">${analysis.functions.join(', ')}</div>
+                </div>`;
+            }
+
+            // Issues
+            if (analysis.issues.length > 0) {
+                html += `<div class="result-section">
+                    <div class="result-header error">❌ Issues Found</div>
+                    <div class="result-content error">
+                        ${analysis.issues.map(i => `<div>• ${i}</div>`).join('')}
                     </div>
-                    <button class="copy-btn" onclick="copyToClipboard('${escapeHtml(analysis)}')">📋 Copy Analysis</button>
-                </div>
-            `;
-            
-            resultsDiv.classList.remove('hidden');
+                </div>`;
+            } else if (analysis.functions.length > 0) {
+                html += `<div class="result-section">
+                    <div class="result-header success">✅ No Syntax Errors</div>
+                    <div class="result-content success">Formula structure looks valid!</div>
+                </div>`;
+            }
+
+            // Detailed Analysis for each function
+            if (analysis.details.length > 0) {
+                analysis.details.forEach(detail => {
+                    const info = detail.info;
+                    html += `<div class="result-section">
+                        <div class="result-header">📚 ${info.name}</div>
+                        <div class="result-content">
+                            <div><strong>Description:</strong> ${info.description}</div>
+                            ${info.syntax ? `<div style="margin-top: 8px;"><strong>Syntax:</strong><br><code style="background:#f0f0f0; padding:4px; border-radius:4px; display:inline-block;">${escapeHtml(info.syntax)}</code></div>` : ''}
+                            ${info.examples && info.examples.length > 0 ? `<div style="margin-top: 8px;"><strong>Examples:</strong><br>${info.examples.map(ex => `<div style="font-size:12px; color:#666; margin:4px 0;">→ ${escapeHtml(ex)}</div>`).join('')}</div>` : ''}
+                            ${info.tips && info.tips.length > 0 ? `<div style="margin-top: 8px;"><strong>Tips:</strong><br>${info.tips.map(tip => `<div style="font-size:12px; color:#666; margin:4px 0;">• ${tip}</div>`).join('')}</div>` : ''}
+                        </div>
+                    </div>`;
+                });
+            }
+
+            container.innerHTML = html;
+            container.classList.remove('hidden');
             placeholder.style.display = 'none';
-        }
-
-        function displayFormulaResults(analysis) {
-            const resultsDiv = document.getElementById('formulaResults');
-            const placeholder = document.getElementById('formulaPlaceholder');
-            
-            resultsDiv.innerHTML = `
-                <div class="result-card">
-                    <div class="result-label">✅ Analysis Complete</div>
-                    <div class="code-block" style="white-space: pre-wrap; font-size: 12px; line-height: 1.6;">
-${escapeHtml(analysis)}
-                    </div>
-                    <button class="copy-btn" onclick="copyToClipboard('${escapeHtml(analysis)}')">📋 Copy Analysis</button>
-                </div>
-            `;
-            
-            resultsDiv.classList.remove('hidden');
-            placeholder.style.display = 'none';
-        }
-
-        function formatSQL() {
-            const input = document.getElementById('sqlInput').value;
-            if (!input) return;
-            
-            // Simple formatting
-            let formatted = input
-                .replace(/(\bSELECT\b|\bFROM\b|\bWHERE\b|\bJOIN\b|\bGROUP BY\b|\bORDER BY\b)/gi, '\n$1')
-                .replace(/,\s*/g, ',\n  ')
-                .trim();
-            
-            document.getElementById('sqlInput').value = formatted;
-        }
-
-        function formatFormula() {
-            const input = document.getElementById('formulaInput').value;
-            if (!input) return;
-            
-            // Simple formula formatting with better readability
-            let formatted = input
-                .replace(/,/g, ', ')
-                .replace(/\(/g, '(\n  ')
-                .replace(/\)/g, '\n)')
-                .trim();
-            
-            document.getElementById('formulaInput').value = formatted;
-        }
-
-        function copyToClipboard(text) {
-            // Remove HTML entities if needed
-            const decoded = text.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
-            navigator.clipboard.writeText(decoded).then(() => {
-                alert('✅ Copied to clipboard!');
-            });
         }
 
         function escapeHtml(text) {
